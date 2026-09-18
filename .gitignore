@@ -1,0 +1,29 @@
+# Dependencies and package manager cache
+node_modules/
+.npm/
+
+# Build output and generated types
+.next/
+out/
+dist/
+next-env.d.ts
+*.tsbuildinfo
+
+# Local configuration and credentials
+.env*
+!.env.example
+*.pem
+*.key
+.vercel/
+
+# Test artifacts
+coverage/
+playwright-report/
+playwright/.cache/
+test-results/
+
+# Machine-local files
+.DS_Store
+*.log
+.idea/
+.vscode/

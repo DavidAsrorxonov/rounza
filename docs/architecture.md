@@ -1,12 +1,13 @@
 # Architecture
 
-## Foundation in this milestone
+## Implemented foundation and demo
 
 - One Next.js App Router application, suitable for the planned Vercel deployment.
 - Route composition in `src/app`, reusable primitives in `src/components/ui`, and
-  shared utilities in `src/lib`. Add feature folders when features need them.
+  shared utilities in `src/lib`, and the isolated demo in `src/features/demo`.
 - Server Components by default; add client boundaries for actual browser state or
-  interaction. The holding page uses a local shadcn Button primitive.
+  interaction. Demo screens are client components behind server-rendered route
+  and metadata wrappers. The landing page remains a Server Component.
 - Tailwind CSS 4 through PostCSS, shared CSS tokens, and the `@/*` source alias.
 - Strict TypeScript, Next's ESLint rules, consistent formatting, and browser tests
   against the production server. CI and local verification use the same commands.
@@ -16,6 +17,35 @@
 ESLint is pinned to 9.39.5 because the React plugin bundled with Next.js 16.3.5's
 ESLint config fails under ESLint 10. Revisit the pin when that configuration
 supports the new rule API; do not force incompatible peer dependencies.
+
+### Demo state and behavior
+
+`/demo` is the next-actions view, `/demo/applications` provides search, status
+filters, and list/board views, and `/demo/applications/[id]` shows a full journey.
+Dialogs and detail tabs use Radix primitives for focus management and keyboard
+navigation. The board supports horizontal scrolling, including keyboard focus,
+with application changes made explicitly in the detail view.
+
+`useSyncExternalStore` shares one immutable snapshot across screens. The initial
+server snapshot is a loading state, so browser-local dates and storage do not
+create hydration mismatches. `sessionStorage` uses the namespaced key
+`rounza.demo.v1`; Zod validates shape, version, string bounds, and collections on
+read. Corrupt data gets a new seed. Blocked or full storage falls back to memory
+with a visible explanation. Reset replaces only demo data and restores current
+relative sample dates. There are no account, database, or AI requests.
+
+Demo actions include adding fictional applications, changing broad status,
+checking/reopening tasks, saving notes, scheduling/rescheduling existing rounds,
+and completing rounds. Closing an application excludes its tasks and rounds from
+upcoming views, while preserving history. A completed round does not imply an
+offer or complete its preparation tasks. Reschedule history retains old/new times.
+
+Appointments use browser-local date/time strings and task deadlines use date-only
+strings. All screens label the device time zone. This is a demo convention;
+production timezone storage and scheduling rules belong to the hiring milestone.
+The Northstar portal card has hard-coded fake credentials and no credential input
+or login action. Its AI preview is labeled, precomputed, and based on fictional
+inputs. These examples provide no vault or live-AI security guarantee.
 
 ## Planned boundaries
 

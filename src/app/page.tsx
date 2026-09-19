@@ -1,47 +1,122 @@
-import { ArrowUpRight } from "lucide-react";
+import Link from "next/link";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Check,
+  Circle,
+  Sparkles,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
 export default function HomePage() {
   return (
-    <div className="mx-auto flex min-h-svh max-w-6xl flex-col px-6 sm:px-10">
-      <header className="flex items-center justify-between gap-4 border-b py-7">
-        <span className="text-2xl font-bold tracking-tighter">
-          rounza<span className="text-primary">.</span>
+    <div className="landing">
+      <header className="landing-header">
+        <span className="wordmark">
+          rounza<span>.</span>
         </span>
-        <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold">
-          Coming soon
-        </span>
+        <Link
+          href="/demo"
+          className="flex items-center gap-2 text-sm font-medium"
+        >
+          Explore the demo <ArrowUpRight size={16} aria-hidden="true" />
+        </Link>
       </header>
 
-      <main
-        id="main-content"
-        tabIndex={-1}
-        className="flex flex-1 flex-col justify-center py-20 sm:py-28"
-      >
-        <p className="mb-6 text-sm font-semibold tracking-[0.16em] text-primary uppercase">
-          Every application. Every round.
-        </p>
-        <h1 className="max-w-4xl text-5xl leading-[1.05] font-bold tracking-[-0.055em] sm:text-7xl lg:text-8xl">
-          A home for your
-          <br className="hidden sm:block" /> next chapter.
-        </h1>
-        <p className="mt-7 max-w-lg text-lg leading-relaxed text-muted-foreground">
-          Your job search has a lot of moving parts. Rounza is taking shape to
-          help you keep them together, from the first application to the final
-          round.
-        </p>
-        <div className="mt-9">
-          <Button asChild size="lg">
-            <a href="https://github.com/DavidAsrorxonov/rounza">
-              Follow the project <ArrowUpRight aria-hidden="true" />
-            </a>
+      <main id="main-content" tabIndex={-1} className="landing-main">
+        <div className="landing-copy">
+          <p className="eyebrow">EVERY APPLICATION. EVERY ROUND.</p>
+          <h1>
+            Your search.
+            <br />A little <span>clearer.</span>
+          </h1>
+          <p className="landing-description">
+            A home for your next chapter. Bring your applications, interviews,
+            and next steps together, so you can focus on the possibilities.
+          </p>
+          <Button size="lg" className="mt-8 h-12 rounded-lg px-6" asChild>
+            <Link href="/demo">
+              Try the interactive demo{" "}
+              <ArrowRight size={17} aria-hidden="true" />
+            </Link>
           </Button>
+          <p className="mt-4 text-xs text-muted-foreground">
+            No sign-up. Fictional data. Room to explore.
+          </p>
+          <div className="landing-points">
+            <span>
+              <Check size={14} aria-hidden="true" /> See the whole journey
+            </span>
+            <span>
+              <Check size={14} aria-hidden="true" /> Know your next step
+            </span>
+          </div>
+        </div>
+        <div
+          className="landing-preview"
+          aria-label="A preview of Rounza’s sample workspace"
+        >
+          <div className="preview-label">
+            <span className="demo-badge">
+              <span aria-hidden="true" />A little look inside
+            </span>
+            <Sparkles size={20} aria-hidden="true" />
+          </div>
+          <p className="mt-7 text-xs font-medium text-muted-foreground">
+            YOUR NEXT MOVE
+          </p>
+          <div className="preview-application">
+            <span className="company-mark company-lilac" aria-hidden="true">
+              N
+            </span>
+            <div>
+              <p className="text-xs text-muted-foreground">Northstar</p>
+              <p className="mt-1 text-base font-semibold">Portfolio review</p>
+            </div>
+            <span className="preview-dot" aria-hidden="true" />
+          </div>
+          <div className="preview-journey">
+            <div>
+              <span className="is-done">
+                <Check size={12} />
+              </span>
+              <p>Screening</p>
+            </div>
+            <div>
+              <span className="is-done">
+                <Check size={12} />
+              </span>
+              <p>Design lead</p>
+            </div>
+            <div>
+              <span className="is-current">3</span>
+              <p>Portfolio</p>
+            </div>
+            <div>
+              <span>4</span>
+              <p>Team</p>
+            </div>
+          </div>
+          <div className="preview-task">
+            <Circle size={17} className="text-primary" aria-hidden="true" />
+            <div>
+              <p>Polish your case study</p>
+              <span>One small step toward the next round.</span>
+            </div>
+          </div>
+          <div className="preview-footer">
+            <span>THE WHOLE PICTURE, AT LAST.</span>
+            <ArrowUpRight size={18} aria-hidden="true" />
+          </div>
         </div>
       </main>
 
-      <footer className="border-t py-6 text-sm text-muted-foreground">
-        A little more clarity for what comes next.
+      <footer className="landing-footer">
+        <span>Small steps. New possibilities.</span>
+        <a href="https://github.com/DavidAsrorxonov/rounza">
+          Follow the project <ArrowUpRight size={14} aria-hidden="true" />
+        </a>
       </footer>
     </div>
   );

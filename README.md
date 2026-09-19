@@ -2,9 +2,10 @@
 
 A thoughtful home for your job search, from the first application to the final round.
 
-**Current scope: milestone 1 — project foundation.** The app has a holding page,
-a shared UI foundation, and automated quality checks. The interactive demo,
-accounts, job tracking, credential vault, and AI features are later milestones.
+**Current scope: milestones 1–2 — foundation and interactive demo.** Explore a
+fictional job search with a next-actions dashboard, application list/board, and
+multi-round hiring journeys. Private accounts, database storage, the encrypted
+credential vault, and live AI are later milestones.
 
 ## Run locally
 
@@ -22,6 +23,20 @@ npm run dev
 
 Open [localhost:3000](http://localhost:3000). If you do not use nvm, install a
 supported Node version and skip the two nvm commands.
+
+Open [the demo](http://localhost:3000/demo) from the landing page. Start with
+Northstar for the fullest example: five hiring rounds, preparation tasks,
+notes, a fictional contact, sample portal credentials, and a precomputed AI
+analysis. Try rescheduling its portfolio review, completing a task, changing
+its status, or adding your own fictional application. The reset button in the
+header restores all ten examples after confirmation.
+
+Changes are saved to `sessionStorage` in the current tab, survive reloads, and
+are never sent to a server. A fresh independent tab starts its own workspace;
+browser duplication/session restoration can copy or restore a tab's data.
+Malformed saved data is replaced with a fresh sample. If session storage is
+unavailable, the demo stays usable in memory and explains that reloads lose edits.
+Use fictional information only: this is not a private account or a secure vault.
 
 **No service accounts or API keys are required for this milestone.**
 `.env.example` documents the planned Supabase and OpenAI variables; they are not
@@ -53,7 +68,9 @@ On Linux, use `npx playwright install --with-deps chromium` to install system
 dependencies too. Tests start and stop their own production server on port 3100;
 keep that port available. `npm test` and `npm run test:ui` require a fresh
 `npm run build`. Smoke tests cover desktop/mobile startup, keyboard navigation,
-and the 404 return path. They do not claim coverage of future product features.
+and the 404 return path. Demo tests cover task persistence, list/board filtering,
+rescheduling history, closed-journey reminders, notes, tab isolation, reset,
+invalid/unavailable storage, and the explicitly simulated AI/credential examples.
 
 ## Stack and structure
 
@@ -65,6 +82,7 @@ ESLint, Prettier, and Playwright provide the initial quality tooling.
 src/
   app/              Routes, root layout, metadata, and global styles
   components/ui/    Local shadcn/ui component source
+  features/demo/    Fictional data, validated tab state, and interactive screens
   lib/              Shared utilities
 tests/e2e/          Production browser smoke tests
 docs/              Architecture decisions and implementation roadmap
@@ -86,6 +104,10 @@ It needs no application secrets. Failed browser runs retain reports for seven da
 The empty repository is bootstrapped on `main` for milestone 1. Use a focused
 branch and pull request for each subsequent milestone, keeping `main` buildable.
 Run `npm run verify` before publishing a change.
+
+In a restricted desktop sandbox that cannot register filesystem watchers, use
+`WATCHPACK_POLLING=true npm run dev`. If the sandbox prevents Chromium from
+launching, run the browser suite in GitHub Actions or a normal local terminal.
 
 See [the roadmap](docs/roadmap.md) for scope and
 [the architecture notes](docs/architecture.md) for boundaries. Vercel deployment

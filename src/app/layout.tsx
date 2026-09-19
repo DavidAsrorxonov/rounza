@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: "%s | Rounza",
   },
   description:
-    "Rounza is taking shape: a thoughtful home for applications, interviews, and your next career move.",
+    "Explore Rounza’s interactive demo: a thoughtful home for applications, interviews, and your next career move.",
 };
 
 export default function RootLayout({

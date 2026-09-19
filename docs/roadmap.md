@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-Only milestone 1 is included in this implementation. Later milestones start when
+Milestones 1 and 2 are included in this implementation. Later milestones start when
 requested. Each milestone should deliver a working result and relevant checks.
 
 | Milestone                         | Result                                                                                                                                            |
@@ -24,6 +24,18 @@ requested. Each milestone should deliver a working result and relevant checks.
 - The environment example is committed; secrets, dependencies, build output, and
   browser reports are ignored.
 - The initial repository is published to GitHub with CI configured.
+
+## Milestone 2 acceptance
+
+- The public demo has a responsive dashboard, list/board, and application details.
+- Ten fictional applications include multiple interviews, assessments, preparation
+  tasks, and both active and closed journeys.
+- Demo edits persist on reload in their tab, are isolated from independent tabs,
+  and can be reset to the original sample after confirmation.
+- Tasks, status changes, notes, and rescheduling remain consistent across views.
+- Empty searches, missing applications, and invalid/unavailable storage are handled.
+- AI and portal credentials are labeled examples with no live external requests.
+- Desktop and mobile browser tests cover the core demo flows and existing routes.
 
 ## Product scope
 

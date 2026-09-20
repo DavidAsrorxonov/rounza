@@ -1,6 +1,6 @@
 # Architecture
 
-## Implemented foundation and demo
+## Implemented foundation, demo, and accounts
 
 - One Next.js App Router application, suitable for the planned Vercel deployment.
 - Route composition in `src/app`, reusable primitives in `src/components/ui`, and
@@ -11,8 +11,8 @@
 - Tailwind CSS 4 through PostCSS, shared CSS tokens, and the `@/*` source alias.
 - Strict TypeScript, Next's ESLint rules, consistent formatting, and browser tests
   against the production server. CI and local verification use the same commands.
-- No database, authentication provider, AI client, credential handling, or external
-  runtime requests yet. No deployment has been configured.
+- Supabase handles private accounts and database requests when configured. No live AI
+  or employer-credential handling is implemented. No deployment is configured.
 
 ESLint is pinned to 9.39.5 because the React plugin bundled with Next.js 16.3.5's
 ESLint config fails under ESLint 10. Revisit the pin when that configuration
@@ -47,16 +47,51 @@ The Northstar portal card has hard-coded fake credentials and no credential inpu
 or login action. Its AI preview is labeled, precomputed, and based on fictional
 inputs. These examples provide no vault or live-AI security guarantee.
 
+## Accounts and database
+
+`/login` starts Google OAuth through a Server Action. Supabase SSR manages PKCE and
+HttpOnly, SameSite=Lax cookies (Secure with HTTPS). `/auth/callback` exchanges the
+code and redirects to a fixed `/app` destination on the configured `SITE_URL`.
+User-supplied return URLs, provider error text, and forwarded hosts never determine
+that destination. Sign-out is a POST Server Action scoped to this browser and
+invalidates Next's route cache. Next's Server Action origin checks remain enabled.
+
+`src/proxy.ts` refreshes sessions only for account/auth routes and marks responses
+private/no-store. Every private data accessor calls `requireAccount`, which uses
+Supabase `getUser`, not an unverified session-cookie user. React `cache` only
+memoizes the account within a server render; private pages are dynamic and never
+use a shared data cache. The public landing and demo make no Supabase requests.
+
+The app uses a publishable key with the user's session, never a service-role key.
+Private reads explicitly filter the verified user ID. SQL RLS also scopes every
+application operation to `auth.uid()`; an update cannot transfer ownership.
+Anonymous roles have no table privileges. Profiles are readable only by their
+owner and permit updates to display name only. A narrowly scoped SECURITY DEFINER
+trigger creates profiles; its search path is empty and direct client execution is
+revoked. Metadata supplies display text, never authorization. Account deletion
+cascades profiles/applications. There is no account-deletion UI in this milestone.
+
+Versioned migrations live in `supabase/migrations`. `profiles` contains no duplicate
+email or provider tokens. `applications` establishes the ownership and validation
+contract for milestone 4; the account screen reads only its own record count.
+Interview/task/contact schemas arrive with milestone 5; no plaintext credential
+columns exist. A failed private read shows an error, never demo fallback data.
+
+All SDK use is server-side in this milestone, so HttpOnly session cookies are
+intentional. Adding a browser Supabase client later would require revisiting that
+choice. Missing/invalid configuration disables sign-in while keeping the demo
+available. See [setup and verification](accounts-setup.md) and Supabase's
+[SSR guidance](https://supabase.com/docs/guides/auth/server-side/creating-a-client).
+
+The automated OAuth fixture tests the real SDK over local HTTP; database tests
+apply the actual migration in Postgres. Neither verifies a hosted provider's
+configuration. The live sign-in checklist belongs to service setup.
+
 ## Planned boundaries
 
 These are design constraints for later milestones, not implemented guarantees.
 
-### Accounts and data
-
-Supabase will provide Google authentication and Postgres. Every private record
-must belong to a user and be isolated with row-level security as well as server
-ownership checks. The public demo will use fictional data isolated from accounts.
-Database migrations arrive with the accounts milestone.
+### Applications and hiring journeys
 
 An application's broad status (Saved, Applied, Interviewing, Offer, Rejected,
 Withdrawn) is separate from individual hiring steps. Steps must support repeated

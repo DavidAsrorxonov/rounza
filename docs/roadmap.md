@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-Milestones 1 and 2 are included in this implementation. Later milestones start when
+Milestones 1–3 are included in this implementation. Later milestones start when
 requested. Each milestone should deliver a working result and relevant checks.
 
 | Milestone                         | Result                                                                                                                                            |
@@ -36,6 +36,18 @@ requested. Each milestone should deliver a working result and relevant checks.
 - Empty searches, missing applications, and invalid/unavailable storage are handled.
 - AI and portal credentials are labeled examples with no live external requests.
 - Desktop and mobile browser tests cover the core demo flows and existing routes.
+
+## Milestone 3 acceptance
+
+- Configured accounts use Google OAuth with PKCE, cookie sessions, refresh, and sign-out.
+- `/app` requires a server-verified identity; private queries additionally filter ownership.
+- Migrations create profiles and applications with explicit grants and per-user RLS.
+- Profile bootstrap, cross-account isolation, anonymous denial, ownership spoofing,
+  and cascading account cleanup have automated database tests.
+- Public demo behavior is independent of account configuration and authentication.
+- Missing setup, rejected/expired sign-in, and private database failures have usable states.
+- Setup instructions cover Supabase, migrations, Google, and both callback URLs.
+- A live provider acceptance check remains necessary after the owner configures services.
 
 ## Product scope
 

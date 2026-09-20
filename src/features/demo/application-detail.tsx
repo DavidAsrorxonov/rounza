@@ -462,7 +462,9 @@ export function ApplicationDetail({ id }: { id: string }) {
             <div className="panel-heading">
               <h2>Your next steps</h2>
               <span className="count-chip">
-                {application.tasks.filter((task) => !task.done).length}
+                {isActive(application.status)
+                  ? application.tasks.filter((task) => !task.done).length
+                  : 0}
               </span>
             </div>
             {isActive(application.status) ? (

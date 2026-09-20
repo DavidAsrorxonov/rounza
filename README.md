@@ -2,10 +2,10 @@
 
 A thoughtful home for your job search, from the first application to the final round.
 
-**Current scope: milestones 1–2 — foundation and interactive demo.** Explore a
-fictional job search with a next-actions dashboard, application list/board, and
-multi-round hiring journeys. Private accounts, database storage, the encrypted
-credential vault, and live AI are later milestones.
+**Current scope: milestones 1–3 — foundation, interactive demo, and accounts.**
+Explore a fictional job search, or configure Supabase to sign in with Google and
+open your private account workspace. Database migrations and per-user access
+policies are included. Real application editing, the vault, and AI follow later.
 
 ## Run locally
 
@@ -38,24 +38,28 @@ Malformed saved data is replaced with a fresh sample. If session storage is
 unavailable, the demo stays usable in memory and explains that reloads lose edits.
 Use fictional information only: this is not a private account or a secure vault.
 
-**No service accounts or API keys are required for this milestone.**
-`.env.example` documents the planned Supabase and OpenAI variables; they are not
-consumed yet. When needed, copy it to `.env.local` and configure your own values.
-Local environment files are ignored by Git. Anything prefixed `NEXT_PUBLIC_`
-is visible to browsers, so that prefix must never be used for a secret.
+**The public demo needs no service accounts or API keys.** Private accounts need a
+Supabase project and Google provider configuration. Follow the
+[accounts setup guide](docs/accounts-setup.md), which covers environment values,
+migrations, both OAuth callbacks, and a real sign-in checklist.
+
+Local environment files are ignored by Git. Never commit secrets or place them
+in a variable prefixed `NEXT_PUBLIC_`.
 
 ## Commands
 
-| Command           | Purpose                                              |
-| ----------------- | ---------------------------------------------------- |
-| `npm run dev`     | Start the development server                         |
-| `npm run build`   | Create a production build                            |
-| `npm start`       | Serve that production build                          |
-| `npm run check`   | Check formatting, ESLint, and TypeScript             |
-| `npm run format`  | Apply Prettier formatting                            |
-| `npm test`        | Run Playwright against the existing production build |
-| `npm run test:ui` | Open Playwright's interactive test runner            |
-| `npm run verify`  | Check, build, and run browser tests                  |
+| Command             | Purpose                                              |
+| ------------------- | ---------------------------------------------------- |
+| `npm run dev`       | Start the development server                         |
+| `npm run build`     | Create a production build                            |
+| `npm start`         | Serve that production build                          |
+| `npm run check`     | Check formatting, ESLint, and TypeScript             |
+| `npm run format`    | Apply Prettier formatting                            |
+| `npm test`          | Run Playwright against the existing production build |
+| `npm run test:ui`   | Open Playwright's interactive test runner            |
+| `npm run test:unit` | Test configuration and date validation               |
+| `npm run test:db`   | Apply migrations and test database isolation         |
+| `npm run verify`    | Check, test, build, and run browser tests            |
 
 Install the test browser once before the first verification:
 
@@ -65,8 +69,8 @@ npm run verify
 ```
 
 On Linux, use `npx playwright install --with-deps chromium` to install system
-dependencies too. Tests start and stop their own production server on port 3100;
-keep that port available. `npm test` and `npm run test:ui` require a fresh
+dependencies too. Tests start and stop production servers on ports 3100 and 3102 and a local auth
+fixture on 54329; keep those ports available. `npm test` and `npm run test:ui` require a fresh
 `npm run build`. Smoke tests cover desktop/mobile startup, keyboard navigation,
 and the 404 return path. Demo tests cover task persistence, list/board filtering,
 rescheduling history, closed-journey reminders, notes, tab isolation, reset,
@@ -83,8 +87,11 @@ src/
   app/              Routes, root layout, metadata, and global styles
   components/ui/    Local shadcn/ui component source
   features/demo/    Fictional data, validated tab state, and interactive screens
-  lib/              Shared utilities
-tests/e2e/          Production browser smoke tests
+  lib/auth/         Verified account reads and server auth actions
+  lib/supabase/     Server client, configuration, and database types
+supabase/            Versioned schema and row-level access policies
+tests/e2e/          Production browser and auth flow tests
+tests/database/     Postgres ownership and migration tests
 docs/              Architecture decisions and implementation roadmap
 .github/           CI workflow and pull request template
 ```
@@ -98,7 +105,7 @@ builds and page loads do not depend on a third-party font service.
 ## Development workflow
 
 GitHub Actions runs installation, formatting, linting, type checking, a production
-build, and Chromium smoke tests on pushes to `main` and pull requests to `main`.
+build, unit tests, native Postgres isolation tests, and Chromium browser tests on pushes to `main` and pull requests to `main`.
 It needs no application secrets. Failed browser runs retain reports for seven days.
 
 The empty repository is bootstrapped on `main` for milestone 1. Use a focused

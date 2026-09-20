@@ -15,14 +15,8 @@ const id = z
   .min(1)
   .max(100)
   .regex(/^[a-z0-9-]+$/);
-const day = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/)
-  .refine((value) => Number.isFinite(new Date(`${value}T12:00`).getTime()));
-const appointment = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/)
-  .refine((value) => Number.isFinite(new Date(value).getTime()));
+const day = z.iso.date();
+const appointment = z.iso.datetime({ local: true, precision: -1 });
 
 export const applicationSchema = z.object({
   id,

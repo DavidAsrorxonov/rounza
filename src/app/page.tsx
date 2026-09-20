@@ -17,10 +17,10 @@ export default function HomePage() {
           rounza<span>.</span>
         </span>
         <Link
-          href="/demo"
+          href="/login"
           className="flex items-center gap-2 text-sm font-medium"
         >
-          Explore the demo <ArrowUpRight size={16} aria-hidden="true" />
+          Sign in <ArrowUpRight size={16} aria-hidden="true" />
         </Link>
       </header>
 

@@ -224,7 +224,11 @@ test("unavailable session storage falls back to a usable memory-only demo", asyn
     }),
   );
   await page.goto("/demo");
-  await expect(page.getByRole("alert")).toHaveText(
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: "Session storage is unavailable" }),
+  ).toHaveText(
     "Session storage is unavailable in this browser. Changes will be lost when you reload.",
   );
   await page

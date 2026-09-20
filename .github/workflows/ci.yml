@@ -35,6 +35,8 @@ jobs:
         run: npm ci
       - name: Check formatting, lint, and types
         run: npm run check
+      - name: Test configuration and demo validation
+        run: npm run test:unit
       - name: Build production app
         run: npm run build
       - name: Install Chromium
@@ -51,3 +53,37 @@ jobs:
             test-results/
           if-no-files-found: ignore
           retention-days: 7
+
+  database:
+    name: Database ownership and migration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: rounza_test
+          POSTGRES_PASSWORD: local_ci_only
+          POSTGRES_DB: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify migration and isolation in native Postgres
+        run: npm run test:db
+        env:
+          TEST_DATABASE_URL: postgresql://rounza_test:local_ci_only@127.0.0.1:5432/postgres

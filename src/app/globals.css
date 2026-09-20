@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "./demo.css";
+@import "./account.css";
 
 @theme inline {
   --color-background: var(--background);

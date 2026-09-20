@@ -1,0 +1,9 @@
+project_id = "rounza"
+
+[db]
+major_version = 17
+
+[auth]
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["http://localhost:3000/auth/callback"]
+enable_anonymous_sign_ins = false

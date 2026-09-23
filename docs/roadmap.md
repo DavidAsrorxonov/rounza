@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-Milestones 1–3 are included in this implementation. Later milestones start when
+Milestones 1–4 are included in this implementation. Later milestones start when
 requested. Each milestone should deliver a working result and relevant checks.
 
 | Milestone                         | Result                                                                                                                                            |
@@ -48,6 +48,22 @@ requested. Each milestone should deliver a working result and relevant checks.
 - Missing setup, rejected/expired sign-in, and private database failures have usable states.
 - Setup instructions cover Supabase, migrations, Google, and both callback URLs.
 - A live provider acceptance check remains necessary after the owner configures services.
+
+## Milestone 4 acceptance
+
+- Signed-in users can create, view, edit, and permanently delete their own applications.
+- Records include company, role, status, location, job URL, date applied, description,
+  notes, and automatic added/updated dates.
+- Company/role/location search, status filtering, sorting, and list/board views use
+  database queries and URL state; pagination covers the full result set.
+- The overview shows live counts and recently updated applications.
+- Server Actions validate every submitted field and derive ownership from the
+  verified account. Missing and other users' records have the same not-found result.
+- Revision checks reject stale edits/deletes, and failed saves retain form contents.
+- Deletion requires an explicit confirmation; empty, loading, invalid, and failed
+  states remain usable on desktop and mobile.
+- Automated checks cover record persistence, account changes, pagination, search,
+  unsafe URLs, conflict handling, and the new SQL migration.
 
 ## Product scope
 

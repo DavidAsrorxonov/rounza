@@ -1,4 +1,4 @@
-// Schema contract for 202609200001_accounts.sql. Update with every migration.
+// Schema contract for the migrations in supabase/migrations. Update with every migration.
 // Once linked, Supabase CLI can regenerate this file (see docs/accounts-setup.md).
 type Profile = {
   id: string;
@@ -7,6 +7,7 @@ type Profile = {
   updated_at: string;
 };
 type Application = {
+  revision: number;
   id: string;
   user_id: string;
   company: string;
@@ -39,7 +40,16 @@ export type Database = {
       };
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      search_applications: {
+        Args: {
+          search_term?: string;
+          status_filter?:
+            Database["public"]["Enums"]["application_status"] | null;
+        };
+        Returns: Application[];
+      };
+    };
     Enums: {
       application_status:
         | "Saved"

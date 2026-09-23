@@ -5,6 +5,7 @@ import { createServer } from "node:http";
 import { createHash, createHmac, randomUUID } from "node:crypto";
 
 const origin = "http://127.0.0.1:54329";
+const applications = new Map();
 const codes = new Map();
 const refreshTokens = new Map();
 const sessions = new Map();
@@ -50,6 +51,7 @@ function session(user, options = {}) {
   sessions.set(sessionId, {
     user,
     databaseError: options.databaseError ?? false,
+    writeError: options.writeError ?? false,
   });
   return {
     access_token: accessToken,
@@ -137,7 +139,21 @@ createServer(async (request, response) => {
   }
   // Test-only seeding: no production application endpoints or bypass switches.
   if (url.pathname === "/fixture/session") {
-    const user = users[url.searchParams.get("user") ?? "alice"];
+    const key = url.searchParams.get("user") ?? "alice";
+    if (key === "fresh") {
+      const id = randomUUID();
+      users[id] = {
+        id,
+        email: `tracker-${id}@example.com`,
+        user_metadata: { full_name: "Tracker Example" },
+      };
+      return json(
+        response,
+        200,
+        session(users[id], { writeError: url.searchParams.has("writeError") }),
+      );
+    }
+    const user = users[key];
     if (!user) return json(response, 400, {});
     return json(
       response,
@@ -168,14 +184,133 @@ createServer(async (request, response) => {
       created_at: "2026-01-01T00:00:00Z",
     });
   }
-  if (url.pathname === "/rest/v1/applications") {
+  if (url.pathname === "/fixture/applications" && request.method === "POST") {
+    const chunks = [];
+    for await (const chunk of request) chunks.push(chunk);
+    const rows = JSON.parse(Buffer.concat(chunks).toString());
+    for (const row of rows) {
+      const id = row.id ?? randomUUID();
+      applications.set(id, {
+        id,
+        company: "Example",
+        role: "Designer",
+        status: "Saved",
+        location: "",
+        job_url: null,
+        description: "",
+        notes: "",
+        applied_on: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        revision: 1,
+        ...row,
+        user_id: account.user.id,
+      });
+    }
+    return json(response, 200, { seeded: rows.length });
+  }
+  if (
+    url.pathname === "/rest/v1/applications" ||
+    url.pathname === "/rest/v1/rpc/search_applications"
+  ) {
+    const rpc = url.pathname.includes("/rpc/");
+    let body = {};
+    if (["POST", "PATCH"].includes(request.method)) {
+      const chunks = [];
+      for await (const chunk of request) chunks.push(chunk);
+      body = JSON.parse(Buffer.concat(chunks).toString());
+    }
+    if (!rpc && request.method === "POST") {
+      if (account.writeError)
+        return json(response, 503, { message: "Fixture write failed" });
+      if (body.user_id !== account.user.id)
+        return json(response, 403, { message: "Wrong owner" });
+      const row = {
+        id: randomUUID(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        revision: 1,
+        ...body,
+      };
+      applications.set(row.id, row);
+      return json(
+        response,
+        201,
+        request.headers.accept?.includes("vnd.pgrst.object")
+          ? { id: row.id }
+          : [{ id: row.id }],
+      );
+    }
     if (url.searchParams.get("user_id") !== `eq.${account.user.id}`)
       return json(response, 403, { message: "Missing ownership filter" });
-    response.writeHead(200, {
-      "Content-Range": "*/0",
-      "Content-Type": "application/json",
+    let rows = [...applications.values()].filter(
+      (row) => row.user_id === account.user.id,
+    );
+    for (const field of ["id", "status", "revision"]) {
+      const value = url.searchParams.get(field);
+      if (value?.startsWith("eq."))
+        rows = rows.filter((row) => String(row[field]) === value.slice(3));
+    }
+    if (["PATCH", "DELETE"].includes(request.method)) {
+      if (account.writeError)
+        return json(response, 503, { message: "Fixture write failed" });
+      if (!url.searchParams.has("id") || !url.searchParams.has("revision"))
+        return json(response, 400, {
+          message: "Missing record/version filter",
+        });
+      for (const row of rows) {
+        if (request.method === "DELETE") applications.delete(row.id);
+        else
+          applications.set(row.id, {
+            ...row,
+            ...body,
+            revision: row.revision + 1,
+            updated_at: new Date().toISOString(),
+          });
+      }
+      return json(response, 200, rows.length ? { id: rows[0].id } : null);
+    }
+    if (rpc)
+      rows = rows.filter(
+        (row) =>
+          (!body.status_filter || row.status === body.status_filter) &&
+          `${row.company} ${row.role} ${row.location}`
+            .toLowerCase()
+            .includes((body.search_term ?? "").toLowerCase()),
+      );
+    const count = rows.length;
+    const order = (url.searchParams.get("order") ?? "").split(",");
+    rows.sort((a, b) => {
+      for (const part of order) {
+        const [field, direction] = part.split(".");
+        const compare = String(a[field]).localeCompare(String(b[field]));
+        if (compare) return direction === "desc" ? -compare : compare;
+      }
+      return 0;
     });
-    return response.end();
+    const offset = Number(url.searchParams.get("offset") ?? 0);
+    const limit = Number(url.searchParams.get("limit") ?? 1000);
+    rows = rows.slice(offset, offset + limit);
+    const select = url.searchParams.get("select");
+    if (select && select !== "*")
+      rows = rows.map((row) =>
+        Object.fromEntries(select.split(",").map((key) => [key, row[key]])),
+      );
+    response.setHeader(
+      "Content-Range",
+      count ? `${offset}-${offset + rows.length - 1}/${count}` : "*/0",
+    );
+    if (request.method === "HEAD") {
+      response.writeHead(200);
+      return response.end();
+    }
+    return json(
+      response,
+      200,
+      request.headers.accept?.includes("vnd.pgrst.object")
+        ? (rows[0] ?? null)
+        : rows,
+    );
   }
   json(response, 404, { message: "Unknown fixture endpoint" });
 }).listen(54329, "127.0.0.1", () =>

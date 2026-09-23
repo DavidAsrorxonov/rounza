@@ -248,6 +248,106 @@ test("private records enforce ownership in Postgres", async (t) => {
       },
     );
     await t.test(
+      "search respects ownership and treats wildcard/filter punctuation literally",
+      async () => {
+        await as("authenticated", alice);
+        assert.equal(
+          (
+            await db.query(
+              "select * from public.search_applications('Bob', null)",
+            )
+          ).rows.length,
+          0,
+        );
+        assert.equal(
+          (
+            await db.query(
+              "select * from public.search_applications('designer', 'Saved')",
+            )
+          ).rows.length,
+          1,
+        );
+        assert.equal(
+          (
+            await db.query(
+              "select * from public.search_applications('', 'Offer')",
+            )
+          ).rows.length,
+          0,
+        );
+        await db.query(
+          "update public.applications set company=$1 where id=$2",
+          ["50%_.*,Acme (Labs)", app],
+        );
+        assert.equal(
+          (
+            await db.query(
+              "select * from public.search_applications($1, null)",
+              ["%_.*,Acme"],
+            )
+          ).rows.length,
+          1,
+        );
+        assert.equal(
+          (
+            await db.query(
+              "select * from public.search_applications($1, null)",
+              ["id.neq.0)"],
+            )
+          ).rows.length,
+          0,
+        );
+        await as("anon");
+        await denied("select * from public.search_applications('', null)");
+      },
+    );
+    await t.test(
+      "revision checks prevent stale updates and deletes, even if a client sets revision",
+      async () => {
+        await as("authenticated", alice);
+        const before = (
+          await db.query(
+            "select revision from public.applications where id=$1",
+            [app],
+          )
+        ).rows[0].revision;
+        const changed = (
+          await db.query(
+            "update public.applications set notes='New version', revision=1 where id=$1 and revision=$2 returning revision",
+            [app, before],
+          )
+        ).rows;
+        assert.equal(changed[0].revision, before + 1);
+        assert.equal(
+          (
+            await db.query(
+              "update public.applications set notes='Stale edit' where id=$1 and revision=$2 returning id",
+              [app, before],
+            )
+          ).rows.length,
+          0,
+        );
+        assert.equal(
+          (
+            await db.query(
+              "delete from public.applications where id=$1 and revision=$2 returning id",
+              [app, before],
+            )
+          ).rows.length,
+          0,
+        );
+        assert.equal(
+          (
+            await db.query(
+              "select notes from public.applications where id=$1",
+              [app],
+            )
+          ).rows[0].notes,
+          "New version",
+        );
+      },
+    );
+    await t.test(
       "database constraints reject invalid records and owners can delete",
       async () => {
         await as("authenticated", alice);

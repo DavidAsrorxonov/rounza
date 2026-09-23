@@ -2,6 +2,7 @@
 @import "tw-animate-css";
 @import "./demo.css";
 @import "./account.css";
+@import "./tracking.css";
 
 @theme inline {
   --color-background: var(--background);

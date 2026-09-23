@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { WorkspaceNav } from "@/components/workspace-nav";
 import { requireAccount } from "@/lib/auth/account";
 import { signOut } from "@/lib/auth/actions";
 import { AccountSubmit } from "@/components/account-submit";
@@ -17,11 +18,12 @@ export default async function WorkspaceLayout({
 }) {
   await requireAccount();
   return (
-    <div className="account-page">
+    <div className="account-page private-workspace">
       <header className="account-header">
         <Link href="/app" className="wordmark" aria-label="Rounza workspace">
           rounza<span>.</span>
         </Link>
+        <WorkspaceNav />
         <form action={signOut}>
           <AccountSubmit pendingLabel="Signing out…" variant="outline">
             Sign out

@@ -1,6 +1,6 @@
 # Architecture
 
-## Implemented foundation, demo, and accounts
+## Implemented foundation, demo, accounts, and application tracking
 
 - One Next.js App Router application, suitable for the planned Vercel deployment.
 - Route composition in `src/app`, reusable primitives in `src/components/ui`, and
@@ -72,8 +72,8 @@ revoked. Metadata supplies display text, never authorization. Account deletion
 cascades profiles/applications. There is no account-deletion UI in this milestone.
 
 Versioned migrations live in `supabase/migrations`. `profiles` contains no duplicate
-email or provider tokens. `applications` establishes the ownership and validation
-contract for milestone 4; the account screen reads only its own record count.
+email or provider tokens. `applications` stores private records for the implemented create/edit/detail/list/board
+flows. The account overview reads counts and recent records.
 Interview/task/contact schemas arrive with milestone 5; no plaintext credential
 columns exist. A failed private read shows an error, never demo fallback data.
 
@@ -86,6 +86,36 @@ available. See [setup and verification](accounts-setup.md) and Supabase's
 The automated OAuth fixture tests the real SDK over local HTTP; database tests
 apply the actual migration in Postgres. Neither verifies a hosted provider's
 configuration. The live sign-in checklist belongs to service setup.
+
+### Private application tracking
+
+`src/features/applications` is independent of the demo store and sample records.
+Server Components read account-scoped data for the overview, listing, and detail
+pages. Client forms use validated Server Actions for writes. Every operation
+checks the current account; client input cannot set ownership, timestamps, or
+revision. Updates/deletes filter on owner, ID, and the revision seen when editing
+began. A database trigger increments revision, preventing stale forms from silently
+replacing newer data. Failed submissions preserve controlled field values.
+
+Search uses the SECURITY INVOKER `search_applications` function, retaining RLS
+and explicitly matching `auth.uid()`. Bound text is a case-insensitive literal
+substring of company, role, and location; punctuation is not a filter expression
+or SQL wildcard. The caller also filters the verified user ID, selects summary
+columns, applies stable sorting with an ID tie-breaker, and requests 24 rows plus
+an exact count. Pagination is shared by the list and board; board column counts
+refer to the current page. Query parameters hold search/filter/view/sort/page state.
+Descriptions and notes are loaded only for detail/edit views, not every list row.
+
+Job URLs are restricted to HTTP(S) without embedded credentials, and validated
+again before rendering external links. Descriptions/notes render as text. Applied
+on is a date-only value; created/updated timestamps are stored with a time zone
+and displayed as UTC calendar dates for consistent server rendering. Application
+status does not manufacture an applied date or imply any interview outcome.
+
+See [application tracking](application-tracking.md) for user behavior, migration,
+and the acceptance checks. The local Auth/REST fixture supports application
+requests solely for tests; database authorization and search run separately
+against the actual migration in Postgres.
 
 ## Planned boundaries
 

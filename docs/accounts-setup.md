@@ -44,6 +44,11 @@ and profile/timestamp triggers. It backfills existing auth users and seeds no
 applications. Do not run `db reset` against a hosted database. This migration is
 intended for the new Rounza project, not an unrelated shared database.
 
+Step 4 adds `202609230001_application_tracking.sql`, which preserves existing records
+and adds revision checks and a private search function. Run the same dry-run and
+`db push` commands on an existing Rounza project before opening the new tracking UI.
+For a fresh project, apply both migrations in filename order.
+
 The alternative for an initial, empty project is running the complete migration
 once in Supabase's SQL Editor. If using that route, reconcile the CLI migration
 history before subsequently using `db push`; do not apply the file twice.
@@ -102,8 +107,8 @@ Start `npm run dev` and open the hostname configured in `SITE_URL`.
   have its own profile and empty workspace.
 - Visit `/demo`: fictional examples remain separate from the account.
 
-Application creation/editing arrives in milestone 4. This step intentionally offers
-an account landing page with a database-backed record count and a demo link.
+Application tracking is now available at `/app/applications`. Follow the
+[tracking acceptance checklist](application-tracking.md) after verifying sign-in.
 
 ## Troubleshooting
 

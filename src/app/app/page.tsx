@@ -4,15 +4,18 @@ import { Button } from "@/components/ui/button";
 import { getWorkspace } from "@/lib/auth/account";
 import { applicationOverview } from "@/features/applications/data";
 import { ApplicationList } from "@/features/applications/shared";
+import { getNextActions } from "@/features/journey/data";
+import { NextActionList } from "@/features/journey/views";
 export default async function WorkspacePage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
-  const [workspace, overview, params] = await Promise.all([
+  const [workspace, overview, params, nextActions] = await Promise.all([
     getWorkspace(),
     applicationOverview(),
     searchParams,
+    getNextActions("UTC", 1, null, 5),
   ]);
   return (
     <>
@@ -57,6 +60,27 @@ export default async function WorkspacePage({
           </p>
         </Link>
       </div>
+      {workspace.applicationCount > 0 && (
+        <section className="tracking-recent">
+          <div className="tracking-section-heading">
+            <h2>Up next</h2>
+            <Link href="/app/next-actions">
+              All next actions <ArrowUpRight size={15} aria-hidden="true" />
+            </Link>
+          </div>
+          <p className="journey-help mb-4">
+            {nextActions.count} open actions · day grouping in UTC
+          </p>
+          {nextActions.rows.length ? (
+            <NextActionList actions={nextActions.rows} />
+          ) : (
+            <p className="journey-empty">
+              No open actions yet. Add a round or preparation task to an
+              application.
+            </p>
+          )}
+        </section>
+      )}
       {workspace.applicationCount === 0 ? (
         <section className="workspace-welcome">
           <span className="workspace-sprout">

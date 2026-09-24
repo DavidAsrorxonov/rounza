@@ -108,7 +108,10 @@ Start `npm run dev` and open the hostname configured in `SITE_URL`.
 - Visit `/demo`: fictional examples remain separate from the account.
 
 Application tracking is now available at `/app/applications`. Follow the
-[tracking acceptance checklist](application-tracking.md) after verifying sign-in.
+[tracking acceptance checklist](application-tracking.md) and
+[hiring journey checklist](hiring-journeys.md) after verifying sign-in. Apply every
+pending migration, including `202609240001_hiring_journeys.sql`, before using the
+new journey screens.
 
 ## Troubleshooting
 

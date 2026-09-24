@@ -1,7 +1,11 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BriefcaseBusiness } from "lucide-react";
+import {
+  LayoutDashboard,
+  BriefcaseBusiness,
+  CalendarClock,
+} from "lucide-react";
 export function WorkspaceNav() {
   const pathname = usePathname();
   return (
@@ -18,6 +22,13 @@ export function WorkspaceNav() {
       >
         <BriefcaseBusiness size={16} aria-hidden="true" />
         Applications
+      </Link>
+      <Link
+        href="/app/next-actions"
+        aria-current={pathname === "/app/next-actions" ? "page" : undefined}
+      >
+        <CalendarClock size={16} aria-hidden="true" />
+        Next actions
       </Link>
     </nav>
   );

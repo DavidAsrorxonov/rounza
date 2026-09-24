@@ -117,16 +117,36 @@ and the acceptance checks. The local Auth/REST fixture supports application
 requests solely for tests; database authorization and search run separately
 against the actual migration in Postgres.
 
+## Private hiring journeys
+
+`features/journey` owns validated Server Actions, authenticated reads, forms and
+views for rounds, tasks, contacts and Next actions. Each child has its own revision
+and a composite foreign key to `(application_id, user_id)`. Task-to-round links
+also include the application and owner, preventing cross-application links even
+through direct PostgREST calls. A trigger rejects changes to record identity,
+forces revision increments and timestamps, and validates database time zones.
+Explicit grants and per-operation RLS deny anonymous access and account transfer.
+
+A narrowly scoped SECURITY DEFINER trigger appends before/after schedule history
+inside the round's transaction. Clients have SELECT-only access to their own
+history. Round deletion cascades to history but sets task round links to null;
+application/account deletion cascades through the entire journey. Child writes
+also touch the application, updating recency and invalidating old edit revisions.
+
+A SECURITY INVOKER `next_actions` function unions open tasks, scheduled meetings,
+round deadlines and unscheduled rounds, explicitly checking ownership and active
+application status in addition to RLS. Filtering/sorting happens in Postgres before
+pagination, so reminders are not limited to the first application page. The server
+supplies the current instant and day boundaries for the selected IANA zone.
+Meeting instants use timestamptz plus their named zone; date-only deadlines use date.
+The Temporal polyfill rejects skipped wall times and distinguishes repeated ones.
+
+See [hiring journeys](hiring-journeys.md) for reminder semantics, migration details
+and checks. The URL constraint is enforced in both application validation and SQL.
+
 ## Planned boundaries
 
 These are design constraints for later milestones, not implemented guarantees.
-
-### Applications and hiring journeys
-
-An application's broad status (Saved, Applied, Interviewing, Offer, Rejected,
-Withdrawn) is separate from individual hiring steps. Steps must support repeated
-interviews, assessments, cancellation, rescheduling, and history. Timezone-aware
-appointments and date-only deadlines are different data types.
 
 ### Portal credentials
 

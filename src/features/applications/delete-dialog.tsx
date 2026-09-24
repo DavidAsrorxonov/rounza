@@ -17,15 +17,19 @@ export function DeleteApplication({
   company: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [identity, setIdentity] = useState({ id, revision });
   const [state, action, pending] = useActionState<FormState, FormData>(
-    deleteApplication.bind(null, id, revision),
+    deleteApplication.bind(null, identity.id, identity.revision),
     {},
   );
   return (
     <AlertDialog.Root
       open={open}
       onOpenChange={(value) => {
-        if (!pending) setOpen(value);
+        if (!pending) {
+          if (value) setIdentity({ id, revision });
+          setOpen(value);
+        }
       }}
     >
       <AlertDialog.Trigger asChild>
@@ -41,8 +45,9 @@ export function DeleteApplication({
             Delete this application?
           </AlertDialog.Title>
           <AlertDialog.Description className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Your application at {company}, including its description and notes,
-            will be permanently deleted. This can’t be undone.
+            Your application at {company}, including its description, notes,
+            rounds, schedule history, tasks, and contacts, will be permanently
+            deleted. This can’t be undone.
           </AlertDialog.Description>
           {state.message && (
             <p role="alert" className="tracking-form-error mt-4">

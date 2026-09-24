@@ -7,13 +7,22 @@ import { displayDate, safeJobUrl } from "@/features/applications/model";
 import { StatusBadge } from "@/features/applications/shared";
 import { DeleteApplication } from "@/features/applications/delete-dialog";
 
+import { JourneySections } from "@/features/journey/views";
+import { pageNumber } from "@/features/journey/model";
+
 export const metadata: Metadata = { title: "Application details" };
 export default async function ApplicationPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ saved?: string }>;
+  searchParams: Promise<{
+    saved?: string;
+    journey?: string;
+    rounds?: string;
+    tasks?: string;
+    contacts?: string;
+  }>;
 }) {
   const [application, query] = await Promise.all([
     params.then((value) => getApplication(value.id)),
@@ -29,6 +38,13 @@ export default async function ApplicationPage({
       {query.saved === "1" && (
         <p role="status" className="tracking-success">
           Application saved.
+        </p>
+      )}
+      {query.journey && (
+        <p role="status" className="tracking-success">
+          {query.journey === "deleted"
+            ? "Journey record deleted."
+            : "Journey record saved."}
         </p>
       )}
       <div className="tracking-heading">
@@ -47,6 +63,20 @@ export default async function ApplicationPage({
           </Link>
         </Button>
       </div>
+      {["Offer", "Rejected", "Withdrawn"].includes(application.status) && (
+        <p className="account-notice">
+          This application is closed. Its rounds and tasks are kept here, and
+          reminders are paused. Change the application status to resume them.
+        </p>
+      )}
+      <JourneySections
+        applicationId={application.id}
+        pages={{
+          rounds: pageNumber(query.rounds),
+          tasks: pageNumber(query.tasks),
+          contacts: pageNumber(query.contacts),
+        }}
+      />
       <div className="tracking-detail-grid">
         <div className="space-y-6 min-w-0">
           <section className="tracking-detail-panel">

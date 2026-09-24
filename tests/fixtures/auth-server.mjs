@@ -1,6 +1,7 @@
 // Loopback-only OAuth/Auth/PostgREST protocol fixture; never loaded by the app.
 // It tests the real Supabase SDK's PKCE/cookies/refresh against deterministic HTTP.
 // Database authorization is tested separately against actual Postgres.
+import { handleJourney, cascadeJourney } from "./journey-server.mjs";
 import { createServer } from "node:http";
 import { createHash, createHmac, randomUUID } from "node:crypto";
 
@@ -159,6 +160,7 @@ createServer(async (request, response) => {
       response,
       200,
       session(user, {
+        writeError: url.searchParams.has("writeError"),
         expired: url.searchParams.has("expired"),
         databaseError: url.searchParams.has("databaseError"),
       }),
@@ -176,6 +178,8 @@ createServer(async (request, response) => {
   }
   if (account.databaseError)
     return json(response, 503, { message: "Fixture database unavailable" });
+  if (await handleJourney(request, response, url, account, applications, json))
+    return;
   if (url.pathname === "/rest/v1/profiles") {
     if (url.searchParams.get("id") !== `eq.${account.user.id}`)
       return json(response, 403, { message: "Missing ownership filter" });
@@ -259,8 +263,10 @@ createServer(async (request, response) => {
           message: "Missing record/version filter",
         });
       for (const row of rows) {
-        if (request.method === "DELETE") applications.delete(row.id);
-        else
+        if (request.method === "DELETE") {
+          applications.delete(row.id);
+          cascadeJourney(row.id);
+        } else
           applications.set(row.id, {
             ...row,
             ...body,

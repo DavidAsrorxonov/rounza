@@ -1,3 +1,4 @@
+import { journeyChecks } from "./journey-checks.mjs";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFile, readdir } from "node:fs/promises";
@@ -75,7 +76,25 @@ test("private records enforce ownership in Postgres", async (t) => {
     for (const file of (await readdir("supabase/migrations"))
       .filter((p) => p.endsWith(".sql"))
       .sort()) {
+      if (file.includes("hiring_journeys")) {
+        await db.query(
+          "insert into public.applications(id,user_id,company,role,job_url) values ($1,$2,'Legacy','Role','https://old:password@example.com')",
+          [app, alice],
+        );
+      }
       await db.query(await readFile(`supabase/migrations/${file}`, "utf8"));
+      if (file.includes("hiring_journeys")) {
+        assert.equal(
+          (
+            await db.query(
+              "select job_url from public.applications where id=$1",
+              [app],
+            )
+          ).rows[0].job_url,
+          null,
+        );
+        await db.query("delete from public.applications where id=$1", [app]);
+      }
     }
     await db.query("insert into auth.users values ($1, $2)", [
       bob,
@@ -347,6 +366,7 @@ test("private records enforce ownership in Postgres", async (t) => {
         );
       },
     );
+    await journeyChecks(t, db, as, alice, bob, app, bobApp);
     await t.test(
       "database constraints reject invalid records and owners can delete",
       async () => {

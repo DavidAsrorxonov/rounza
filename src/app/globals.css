@@ -3,6 +3,7 @@
 @import "./demo.css";
 @import "./account.css";
 @import "./tracking.css";
+@import "./journey.css";
 
 @theme inline {
   --color-background: var(--background);

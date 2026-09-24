@@ -1,24 +1,24 @@
 "use client";
-
 import { useActionState, useState } from "react";
 import { AlertDialog } from "radix-ui";
-import { Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { deleteApplication } from "./actions";
-import type { FormState } from "./model";
+import { deleteJourney, setTaskCompleted } from "./actions";
+import type { JourneyState, JourneyType } from "./model";
 
-export function DeleteApplication({
+export function DeleteJourney({
+  type,
+  applicationId,
   id,
   revision,
-  company,
 }: {
+  type: JourneyType;
+  applicationId: string;
   id: string;
   revision: number;
-  company: string;
 }) {
   const [open, setOpen] = useState(false);
-  const [state, action, pending] = useActionState<FormState, FormData>(
-    deleteApplication.bind(null, id, revision),
+  const [state, action, pending] = useActionState<JourneyState, FormData>(
+    deleteJourney.bind(null, type, applicationId, id, revision),
     {},
   );
   return (
@@ -29,21 +29,20 @@ export function DeleteApplication({
       }}
     >
       <AlertDialog.Trigger asChild>
-        <Button variant="outline">
-          <Trash2 size={15} aria-hidden="true" />
-          Delete application
-        </Button>
+        <Button variant="outline">Delete {type}</Button>
       </AlertDialog.Trigger>
       <AlertDialog.Portal>
         <AlertDialog.Overlay className="dialog-overlay" />
         <AlertDialog.Content className="dialog-content">
           <AlertDialog.Title className="text-2xl font-semibold">
-            Delete this application?
+            Delete this {type}?
           </AlertDialog.Title>
           <AlertDialog.Description className="mt-3 text-sm leading-relaxed text-muted-foreground">
-            Your application at {company}, including its description, notes,
-            rounds, schedule history, tasks, and contacts, will be permanently
-            deleted. This can’t be undone.
+            This permanently deletes this {type}
+            {type === "round"
+              ? " and its schedule history. Its preparation tasks will stay with the application"
+              : ""}
+            . This can’t be undone.
           </AlertDialog.Description>
           {state.message && (
             <p role="alert" className="tracking-form-error mt-4">
@@ -57,7 +56,7 @@ export function DeleteApplication({
             <input type="hidden" name="confirm" value="delete" />
             <AlertDialog.Cancel asChild>
               <Button type="button" variant="outline" disabled={pending}>
-                Keep application
+                Keep {type}
               </Button>
             </AlertDialog.Cancel>
             <Button type="submit" variant="destructive" disabled={pending}>
@@ -67,5 +66,33 @@ export function DeleteApplication({
         </AlertDialog.Content>
       </AlertDialog.Portal>
     </AlertDialog.Root>
+  );
+}
+export function TaskCompletion({
+  applicationId,
+  id,
+  revision,
+  completed,
+}: {
+  applicationId: string;
+  id: string;
+  revision: number;
+  completed: boolean;
+}) {
+  const [state, action, pending] = useActionState<JourneyState, FormData>(
+    setTaskCompleted.bind(null, applicationId, id, revision, !completed),
+    {},
+  );
+  return (
+    <form action={action}>
+      <Button type="submit" variant="outline" size="sm" disabled={pending}>
+        {pending ? "Saving…" : completed ? "Reopen task" : "Mark complete"}
+      </Button>
+      {state.message && (
+        <p role="alert" className="tracking-field-error">
+          {state.message} Refresh to see its current status.
+        </p>
+      )}
+    </form>
   );
 }

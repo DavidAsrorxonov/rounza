@@ -2,11 +2,13 @@
 
 A thoughtful home for your job search, from the first application to the final round.
 
-**Current scope: milestones 1–4 — private application tracking and a public demo.**
+**Current scope: milestones 1–5 — private hiring journeys and a public demo.**
 Sign in with Google to save applications, update their details/status, search and
 filter your records, and use list or board views. Your overview shows current
-counts and recently updated applications. The fictional demo remains independent.
-Real hiring rounds, the encrypted vault, and AI follow in later milestones.
+counts, next actions, and recently updated applications. Each opportunity supports
+custom interview/assessment rounds, rescheduling history, preparation tasks and
+contacts. The fictional demo remains independent. The encrypted vault and AI follow
+in later milestones.
 
 ## Run locally
 
@@ -43,8 +45,9 @@ Use fictional information only: this is not a private account or a secure vault.
 Supabase project and Google provider configuration. Follow the
 [accounts setup guide](docs/accounts-setup.md), which covers environment values,
 migrations, both OAuth callbacks, and a real sign-in checklist. Existing setups
-must apply the new step 4 migration with `db push` before using application tracking.
-See the [tracking guide](docs/application-tracking.md) for behavior and verification.
+must apply all pending migrations with `db push` before starting this version.
+See the [tracking guide](docs/application-tracking.md) and
+[hiring journeys guide](docs/hiring-journeys.md) for behavior and verification.
 
 Local environment files are ignored by Git. Never commit secrets or place them
 in a variable prefixed `NEXT_PUBLIC_`.
@@ -91,6 +94,7 @@ src/
   components/ui/    Local shadcn/ui component source
   features/demo/    Fictional data, validated tab state, and interactive screens
   features/applications/  Private records, forms, validation, and server operations
+  features/journey/  Rounds, tasks, contacts, schedule history, and next actions
   lib/auth/         Verified account reads and server auth actions
   lib/supabase/     Server client, configuration, and database types
 supabase/            Versioned schema and row-level access policies

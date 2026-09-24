@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-Milestones 1–4 are included in this implementation. Later milestones start when
+Milestones 1–5 are included in this implementation. Later milestones start when
 requested. Each milestone should deliver a working result and relevant checks.
 
 | Milestone                         | Result                                                                                                                                            |
@@ -64,6 +64,24 @@ requested. Each milestone should deliver a working result and relevant checks.
   states remain usable on desktop and mobile.
 - Automated checks cover record persistence, account changes, pagination, search,
   unsafe URLs, conflict handling, and the new SQL migration.
+
+## Milestone 5 acceptance
+
+- Applications support custom/repeated Interview, Assessment and Other rounds,
+  independent statuses, ordering, meeting details and date-only deadlines.
+- Named time zones and daylight-saving gaps/overlaps are handled explicitly.
+- Initial schedules and every time/zone/duration/deadline/status change create
+  immutable before/after history in the same database transaction.
+- General and round-linked tasks can be edited, completed, reopened and deleted;
+  application contacts retain recruiter/interviewer details.
+- The overview and paginated Next actions list surface overdue, today, upcoming
+  and unscheduled items across all active applications; reschedules and closed
+  journeys update reminders consistently.
+- Owner checks, RLS, composite foreign keys, fixed identities and revision checks
+  protect reads/writes and stale forms. Confirmed deletion has documented cascades.
+- Unit, database and desktop/mobile browser checks cover these behaviors.
+- The migration/setup guide includes the hosted acceptance flow and notes the
+  correction for credential-bearing URLs saved by older direct API clients.
 
 ## Product scope
 

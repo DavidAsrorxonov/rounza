@@ -1,0 +1,358 @@
+.journey-sections {
+  display: grid;
+  gap: 32px;
+  margin: 32px 0;
+}
+.journey-section {
+  scroll-margin-top: 24px;
+  min-width: 0;
+}
+.journey-section > h2 {
+  font-size: 1.5rem;
+  font-weight: 650;
+  margin-bottom: 8px;
+}
+.journey-section .eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+.journey-count {
+  font-size: 0.8rem;
+  font-weight: 500;
+  background: #eee;
+  color: #62625b;
+  border-radius: 24px;
+  padding: 4px 8px;
+  vertical-align: middle;
+}
+.journey-empty {
+  padding: 28px;
+  border: 1px dashed #d8d8d0;
+  background: #fff;
+  border-radius: 16px;
+  font-size: 0.9rem;
+  color: #62625b;
+  line-height: 1.7;
+}
+.journey-empty a {
+  color: #304be8;
+  text-decoration: underline;
+}
+.journey-empty h2 {
+  font-size: 1.2rem;
+  color: #252620;
+}
+.journey-rounds {
+  display: grid;
+  gap: 14px;
+}
+.journey-round {
+  display: flex;
+  gap: 16px;
+  border: 1px solid #e1e2d9;
+  background: white;
+  padding: 24px;
+  border-radius: 16px;
+}
+.journey-order {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #edfa74;
+  font-size: 0.9rem;
+  font-weight: 650;
+}
+.journey-round-body {
+  min-width: 0;
+  flex: 1;
+}
+.journey-card-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+.journey-round h3,
+.journey-task-list h3,
+.journey-contacts h3,
+.next-action-list h3 {
+  font-size: 1.05rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.journey-kind {
+  color: #74766b;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 4px;
+  overflow-wrap: anywhere;
+}
+.journey-status {
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  white-space: nowrap;
+  background: #f0f1eb;
+}
+.journey-status-scheduled {
+  background: #e9edff;
+  color: #304be8;
+}
+.journey-status-completed {
+  background: #e6f3dd;
+  color: #326b37;
+}
+.journey-status-cancelled {
+  background: #f4ecea;
+  color: #795c55;
+}
+.journey-round-facts {
+  display: grid;
+  gap: 7px;
+  margin: 14px 0;
+  color: #606255;
+  font-size: 0.88rem;
+  overflow-wrap: anywhere;
+}
+.journey-round-facts a {
+  color: #304be8;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  width: fit-content;
+  text-decoration: underline;
+}
+.journey-notes {
+  margin: 14px 0;
+  font-size: 0.9rem;
+}
+.journey-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  margin-top: 16px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.journey-links a,
+.journey-contacts a,
+.journey-pagination a {
+  color: #304be8;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.journey-task-list {
+  border: 1px solid #e1e2d9;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.journey-task-list > li {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px;
+  border-bottom: 1px solid #e1e2d9;
+}
+.journey-task-list > li:last-child {
+  border-bottom: 0;
+}
+.journey-task-list > li > form {
+  flex-shrink: 0;
+  max-width: 40%;
+}
+.journey-task-list h3 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.journey-task-complete {
+  background: #fafbf7;
+}
+.journey-task-complete h3 {
+  color: #74766b;
+}
+.journey-contacts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+.journey-contacts > li {
+  border: 1px solid #e1e2d9;
+  padding: 24px;
+  border-radius: 16px;
+  background: white;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+.journey-contacts a {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.journey-help {
+  font-weight: 400;
+  font-size: 0.8rem;
+  color: #686b60;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.journey-text-button {
+  color: #304be8;
+  text-decoration: underline;
+  width: fit-content;
+  font-size: 0.8rem;
+}
+.journey-field-wide {
+  grid-column: 1 / -1;
+}
+.journey-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  font-size: 0.82rem;
+  padding: 18px 0;
+}
+.next-action-filters {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.next-action-filters .field-label {
+  flex: 1;
+  min-width: 190px;
+}
+.next-action-list {
+  border: 1px solid #e1e2d9;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+}
+.next-action-list > li {
+  display: grid;
+  grid-template-columns: 98px minmax(0, 1fr) auto;
+  gap: 18px;
+  padding: 22px;
+  align-items: center;
+  border-bottom: 1px solid #e1e2d9;
+}
+.next-action-list > li:last-child {
+  border-bottom: 0;
+}
+.next-action-list h3 a:hover {
+  text-decoration: underline;
+}
+.next-action-bucket {
+  font-size: 0.72rem;
+  font-weight: 650;
+  border-radius: 20px;
+  padding: 6px 10px;
+  text-align: center;
+  background: #f0f1eb;
+}
+.bucket-0 {
+  background: #fff0e8;
+  color: #a04b22;
+}
+.bucket-1 {
+  background: #edfa74;
+  color: #3f431f;
+}
+.bucket-2 {
+  background: #e9edff;
+  color: #304be8;
+}
+.journey-application-link {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  color: #686b60;
+}
+.schedule-history {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+}
+.schedule-history li {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid #e1e2d9;
+  border-radius: 16px;
+  background: #fff;
+  font-size: 0.88rem;
+  line-height: 1.8;
+  overflow-wrap: anywhere;
+}
+.schedule-history li > h3,
+.schedule-history li > p {
+  grid-column: 1 / -1;
+}
+.schedule-history h3 {
+  font-weight: 650;
+  font-size: 1.05rem;
+}
+.schedule-history li > div {
+  background: #f7f8f2;
+  padding: 14px;
+  border-radius: 10px;
+}
+@media (max-width: 700px) {
+  .journey-section .tracking-section-heading {
+    align-items: flex-start;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .journey-round {
+    padding: 18px 14px;
+    gap: 10px;
+  }
+  .journey-order {
+    width: 26px;
+    height: 26px;
+    font-size: 0.75rem;
+  }
+  .journey-card-heading {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .journey-task-list > li {
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+  }
+  .journey-task-list > li > form {
+    max-width: 100%;
+  }
+  .journey-contacts {
+    grid-template-columns: 1fr;
+  }
+  .next-action-list > li {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 20px;
+  }
+  .next-action-bucket {
+    width: fit-content;
+  }
+  .schedule-history li {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+  .workspace-nav {
+    flex-wrap: wrap;
+  }
+}

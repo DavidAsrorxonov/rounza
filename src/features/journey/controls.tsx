@@ -17,15 +17,30 @@ export function DeleteJourney({
   revision: number;
 }) {
   const [open, setOpen] = useState(false);
+  const [identity, setIdentity] = useState({
+    type,
+    applicationId,
+    id,
+    revision,
+  });
   const [state, action, pending] = useActionState<JourneyState, FormData>(
-    deleteJourney.bind(null, type, applicationId, id, revision),
+    deleteJourney.bind(
+      null,
+      identity.type,
+      identity.applicationId,
+      identity.id,
+      identity.revision,
+    ),
     {},
   );
   return (
     <AlertDialog.Root
       open={open}
       onOpenChange={(value) => {
-        if (!pending) setOpen(value);
+        if (!pending) {
+          if (value) setIdentity({ type, applicationId, id, revision });
+          setOpen(value);
+        }
       }}
     >
       <AlertDialog.Trigger asChild>

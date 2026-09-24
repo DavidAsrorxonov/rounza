@@ -40,6 +40,11 @@ export const roundInput = z
       .refine(
         validTimeZone,
         "Enter an IANA time zone, such as Asia/Tokyo or Europe/London.",
+      )
+      .transform(
+        (zone) =>
+          new Intl.DateTimeFormat("en", { timeZone: zone }).resolvedOptions()
+            .timeZone,
       ),
     occurrence: z.enum(["reject", "earlier", "later"]),
     duration_minutes: z.coerce.number().int().min(5).max(1440),

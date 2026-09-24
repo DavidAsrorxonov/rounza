@@ -25,6 +25,10 @@ test("rounds validate scheduling, repeated titles, URLs and strip ownership", ()
   };
   const parsed = roundInput.parse(input);
   assert.equal(parsed.scheduled_at, "2026-10-01T00:30:00Z");
+  assert.equal(
+    roundInput.parse({ ...input, time_zone: "asia/tokyo" }).time_zone,
+    "Asia/Tokyo",
+  );
   assert.equal(parsed.meeting_url, null);
   assert.ok(!("user_id" in parsed));
   for (const invalid of [
@@ -72,6 +76,10 @@ test("nonexistent times are rejected and repeated clock times require an explici
   assert.equal(first, "2026-11-01T05:30:00Z");
   assert.equal(second, "2026-11-01T06:30:00Z");
   assert.equal(localSchedule(second, "America/New_York").occurrence, "later");
+  assert.equal(
+    localSchedule("2026-10-01T05:30:00Z", "America/New_York").occurrence,
+    "reject",
+  );
   assert.equal(
     localSchedule(second, "America/New_York").local,
     "2026-11-01T01:30",

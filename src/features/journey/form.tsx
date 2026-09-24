@@ -92,11 +92,16 @@ export function JourneyForm({
                 event: React.ChangeEvent<
                   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
                 >,
-              ) =>
+              ) => {
+                const value = event.target.value;
                 setValues((current) => ({
                   ...current,
-                  [field.name]: event.target.value,
-                })),
+                  [field.name]: value,
+                  ...(["scheduled_local", "time_zone"].includes(field.name)
+                    ? { occurrence: "reject" }
+                    : {}),
+                }));
+              },
             };
             return (
               <div
@@ -143,6 +148,7 @@ export function JourneyForm({
                         ...current,
                         time_zone:
                           Intl.DateTimeFormat().resolvedOptions().timeZone,
+                        occurrence: "reject",
                       }))
                     }
                   >

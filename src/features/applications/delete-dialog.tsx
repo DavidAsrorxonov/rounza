@@ -17,15 +17,19 @@ export function DeleteApplication({
   company: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [identity, setIdentity] = useState({ id, revision });
   const [state, action, pending] = useActionState<FormState, FormData>(
-    deleteApplication.bind(null, id, revision),
+    deleteApplication.bind(null, identity.id, identity.revision),
     {},
   );
   return (
     <AlertDialog.Root
       open={open}
       onOpenChange={(value) => {
-        if (!pending) setOpen(value);
+        if (!pending) {
+          if (value) setIdentity({ id, revision });
+          setOpen(value);
+        }
       }}
     >
       <AlertDialog.Trigger asChild>

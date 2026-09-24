@@ -39,10 +39,15 @@ export function localSchedule(instant: string | null, zone: string) {
   const zoned = Temporal.Instant.from(instant).toZonedDateTimeISO(zone);
   const wall = zoned.toPlainDateTime();
   const earlier = wall.toZonedDateTime(zone, { disambiguation: "earlier" });
+  const later = wall.toZonedDateTime(zone, { disambiguation: "later" });
   return {
     local: wall.toString({ smallestUnit: "minute" }),
     occurrence:
-      zoned.epochNanoseconds === earlier.epochNanoseconds ? "earlier" : "later",
+      earlier.epochNanoseconds === later.epochNanoseconds
+        ? "reject"
+        : zoned.epochNanoseconds === earlier.epochNanoseconds
+          ? "earlier"
+          : "later",
   };
 }
 export function formatMeeting(instant: string, zone: string) {

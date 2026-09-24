@@ -424,3 +424,107 @@ test("next-action and journey pagination cover all records, with stable filters"
     page.getByRole("link", { name: "Back to first page" }),
   ).toBeVisible();
 });
+
+test("editing a meeting resets clock-change choices without losing the saved occurrence", async ({
+  page,
+  context,
+  request,
+}) => {
+  const owner = await signIn(context, request);
+  const appId = randomUUID(),
+    roundId = randomUUID();
+  await seed(request, owner.access_token, [{ id: appId }]);
+  await seedJourney(request, owner.access_token, "hiring_rounds", [
+    {
+      id: roundId,
+      application_id: appId,
+      title: "Clock change",
+      status: "Scheduled",
+      scheduled_at: "2026-11-01T06:30:00Z",
+      time_zone: "America/New_York",
+    },
+  ]);
+  await page.goto(`/app/applications/${appId}/journey/round/${roundId}/edit`);
+  await expect(page.getByLabel("Clock-change occurrence")).toHaveValue("later");
+  await page
+    .getByLabel("Meeting date and time", { exact: true })
+    .fill("2026-11-01T01:45");
+  await expect(page.getByLabel("Clock-change occurrence")).toHaveValue(
+    "reject",
+  );
+  await page.getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(page.getByText(/This time occurs twice/)).toBeVisible();
+  await page.getByLabel("Clock-change occurrence").selectOption("later");
+  await save(page);
+  await page
+    .getByRole("link", { name: "Edit or reschedule", exact: true })
+    .click();
+  await expect(
+    page.getByLabel("Meeting date and time", { exact: true }),
+  ).toHaveValue("2026-11-01T01:45");
+  await expect(page.getByLabel("Clock-change occurrence")).toHaveValue("later");
+});
+
+test("delete confirmation retains the version it opened with after a concurrent save", async ({
+  page,
+  context,
+  request,
+}) => {
+  const owner = await signIn(context, request);
+  const appId = randomUUID(),
+    roundId = randomUUID();
+  await seed(request, owner.access_token, [{ id: appId }]);
+  await seedJourney(request, owner.access_token, "hiring_rounds", [
+    { id: roundId, application_id: appId, title: "Keep this round" },
+  ]);
+  const path = `/app/applications/${appId}`,
+    edit = `${path}/journey/round/${roundId}/edit`;
+  await page.goto(edit);
+  await page.getByRole("button", { name: "Delete round", exact: true }).click();
+  const other = await context.newPage();
+  await other.goto(edit);
+  await other
+    .getByLabel("Round notes", { exact: true })
+    .fill("Newly saved context.");
+  await save(other);
+  for (let attempt = 0; attempt < 2; attempt++) {
+    await page
+      .getByRole("button", { name: "Delete permanently", exact: true })
+      .click();
+    await expect(page.getByRole("alertdialog")).toContainText(
+      "This record changed or is no longer available",
+    );
+  }
+  await other.reload();
+  await expect(
+    other.getByText("Newly saved context.", { exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Keep round", exact: true }).click();
+  await page.goto(path);
+  await page
+    .getByRole("button", { name: "Delete application", exact: true })
+    .click();
+  await other.goto(`${path}/edit`);
+  await other
+    .getByLabel("Notes", { exact: true })
+    .fill("New application context.");
+  await other
+    .getByRole("button", { name: "Save changes", exact: true })
+    .click();
+  await expect(
+    other.getByText("Application saved.", { exact: true }),
+  ).toBeVisible();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    await page
+      .getByRole("button", { name: "Delete permanently", exact: true })
+      .click();
+    await expect(page.getByRole("alertdialog")).toContainText(
+      "This application changed or is no longer available",
+    );
+  }
+  await other.reload();
+  await expect(
+    other.getByText("New application context.", { exact: true }),
+  ).toBeVisible();
+  await other.close();
+});

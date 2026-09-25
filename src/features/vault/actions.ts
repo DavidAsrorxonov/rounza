@@ -91,7 +91,12 @@ export async function loadPortalPage(
   onlyLinked: boolean,
   page: number,
 ): Promise<
-  VaultResult<{ records: PortalRecord[]; count: number; linked: string[] }>
+  VaultResult<{
+    records: PortalRecord[];
+    count: number;
+    linked: string[];
+    page: number;
+  }>
 > {
   const { supabase, user } = await requireAccount();
   if (
@@ -105,18 +110,34 @@ export async function loadPortalPage(
     typeof onlyLinked !== "boolean"
   )
     return failed();
-  const result = await supabase
-    .rpc(
-      "list_portal_accounts",
-      { p_application_id: onlyLinked ? applicationId : null },
-      { count: "exact" },
-    )
-    .eq("user_id", user.id)
-    .eq("vault_id", vaultId)
-    .order("updated_at", { ascending: false })
-    .order("id")
-    .range((page - 1) * VAULT_PAGE_SIZE, page * VAULT_PAGE_SIZE - 1);
-  if (result.error && result.error.code !== "PGRST103") return failed();
+  const queryPage = (requestedPage: number) =>
+    supabase
+      .rpc(
+        "list_portal_accounts",
+        { p_application_id: onlyLinked ? applicationId : null },
+        { count: "exact" },
+      )
+      .eq("user_id", user.id)
+      .eq("vault_id", vaultId)
+      .order("updated_at", { ascending: false })
+      .order("id")
+      .range(
+        (requestedPage - 1) * VAULT_PAGE_SIZE,
+        requestedPage * VAULT_PAGE_SIZE - 1,
+      );
+  let actualPage = page;
+  let result = await queryPage(page);
+  // Concurrent deletion/unlinking can remove the requested page. Re-query page
+  // one for an accurate count; PostgREST's 416 error does not include one.
+  if (
+    page > 1 &&
+    (result.error?.code === "PGRST103" ||
+      (!result.error && !result.data?.length))
+  ) {
+    actualPage = 1;
+    result = await queryPage(1);
+  }
+  if (result.error) return failed();
   const records = result.data ?? [];
   let linked: string[] = [];
   if (applicationId && records.length) {
@@ -133,7 +154,10 @@ export async function loadPortalPage(
     if (links.error) return failed();
     linked = links.data.map((row) => row.portal_id);
   }
-  return { ok: true, data: { records, count: result.count ?? 0, linked } };
+  return {
+    ok: true,
+    data: { records, count: result.count ?? 0, linked, page: actualPage },
+  };
 }
 export async function savePortal(
   owner: string,

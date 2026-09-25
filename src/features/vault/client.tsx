@@ -219,7 +219,7 @@ export function VaultClient({
     setEntries(opened);
     setLinked(result.linked);
     setCount(result.count);
-    setPage(nextPage);
+    setPage(result.page);
     setOnlyLinked(linkedOnly);
   };
   const reload = (nextPage = page, linkedOnly = onlyLinked) =>

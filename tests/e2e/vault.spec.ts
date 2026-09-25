@@ -593,6 +593,23 @@ test("encrypted pagination isolates damaged records and reset keeps applications
     .getByRole("button", { name: "Previous page", exact: true })
     .click();
   await expect(accounts.getByRole("listitem")).toHaveCount(20);
+  // Another device removes the last page after this browser read its count.
+  const removed = (
+    await state(request, session.access_token)
+  ).portal_accounts.slice(-3);
+  for (const record of removed) {
+    const response = await request.delete(
+      `http://127.0.0.1:54329/rest/v1/portal_accounts?user_id=eq.${record.user_id}&id=eq.${record.id}&revision=eq.${record.revision}`,
+      { headers: { Authorization: `Bearer ${session.access_token}` } },
+    );
+    expect(response.ok()).toBe(true);
+  }
+  await page.getByRole("button", { name: "Next page", exact: true }).click();
+  await expect(page.getByText("Page 1 of 1", { exact: true })).toBeVisible();
+  await expect(accounts.getByRole("listitem")).toHaveCount(20);
+  await expect(
+    page.getByRole("button", { name: "Next page", exact: true }),
+  ).toBeDisabled();
   await page.getByRole("button", { name: "Reset vault", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Delete vault permanently", exact: true }),

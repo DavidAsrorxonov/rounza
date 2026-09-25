@@ -188,6 +188,11 @@ export async function handleVault(
   });
   const offset = Number(url.searchParams.get("offset") ?? 0),
     limit = Number(url.searchParams.get("limit") ?? 1000);
+  if (offset > 0 && offset >= count)
+    return reply(416, {
+      code: "PGRST103",
+      message: "Requested range not satisfiable",
+    });
   rows = rows.slice(offset, offset + limit);
   const select = url.searchParams.get("select");
   if (select && select !== "*")

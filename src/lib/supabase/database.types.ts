@@ -1,3 +1,8 @@
+import type {
+  VaultRecord,
+  PortalRecord,
+  PortalLink,
+} from "@/features/vault/model";
 // Schema contract for the migrations in supabase/migrations. Update with every migration.
 // Once linked, Supabase CLI can regenerate this file (see docs/accounts-setup.md).
 type Profile = {
@@ -102,6 +107,24 @@ type JourneyTable<T extends JourneyRecord, K extends keyof T> = {
 export type Database = {
   public: {
     Tables: {
+      credential_vaults: {
+        Row: VaultRecord;
+        Insert: Omit<VaultRecord, "revision" | "created_at" | "updated_at">;
+        Update: Partial<VaultRecord>;
+        Relationships: [];
+      };
+      portal_accounts: {
+        Row: PortalRecord;
+        Insert: Omit<PortalRecord, "revision" | "created_at" | "updated_at">;
+        Update: Partial<PortalRecord>;
+        Relationships: [];
+      };
+      application_portals: {
+        Row: PortalLink;
+        Insert: Omit<PortalLink, "created_at">;
+        Update: never;
+        Relationships: [];
+      };
       hiring_rounds: JourneyTable<HiringRound, "title">;
       preparation_tasks: JourneyTable<PreparationTask, "title">;
       application_contacts: JourneyTable<ApplicationContact, "name">;
@@ -127,6 +150,20 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      create_portal_account: {
+        Args: {
+          p_id: string;
+          p_vault_id: string;
+          p_nonce: string;
+          p_ciphertext: string;
+          p_application_id?: string | null;
+        };
+        Returns: string;
+      };
+      list_portal_accounts: {
+        Args: { p_application_id?: string | null };
+        Returns: PortalRecord[];
+      };
       next_actions: {
         Args: { today: string; day_end: string; at_time: string };
         Returns: NextAction[];

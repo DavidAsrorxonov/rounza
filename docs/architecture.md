@@ -1,6 +1,6 @@
 # Architecture
 
-## Implemented foundation, demo, accounts, and application tracking
+## Implemented foundation, accounts, journeys, and vault
 
 - One Next.js App Router application, suitable for the planned Vercel deployment.
 - Route composition in `src/app`, reusable primitives in `src/components/ui`, and
@@ -11,8 +11,8 @@
 - Tailwind CSS 4 through PostCSS, shared CSS tokens, and the `@/*` source alias.
 - Strict TypeScript, Next's ESLint rules, consistent formatting, and browser tests
   against the production server. CI and local verification use the same commands.
-- Supabase handles private accounts and database requests when configured. No live AI
-  or employer-credential handling is implemented. No deployment is configured.
+- Supabase handles private accounts and database requests when configured. Employer portal
+  data is encrypted in the browser. No live AI or deployment is configured.
 
 ESLint is pinned to 9.39.5 because the React plugin bundled with Next.js 16.3.5's
 ESLint config fails under ESLint 10. Revisit the pin when that configuration
@@ -74,7 +74,8 @@ cascades profiles/applications. There is no account-deletion UI in this mileston
 Versioned migrations live in `supabase/migrations`. `profiles` contains no duplicate
 email or provider tokens. `applications` stores private records for the implemented create/edit/detail/list/board
 flows. The account overview reads counts and recent records.
-Interview/task/contact schemas arrive with milestone 5; no plaintext credential
+Hiring rounds, preparation tasks, contacts and schedule history accompany each
+application. Portal accounts use separate encrypted tables; no plaintext credential
 columns exist. A failed private read shows an error, never demo fallback data.
 
 All SDK use is server-side in this milestone, so HttpOnly session cookies are
@@ -144,23 +145,45 @@ The Temporal polyfill rejects skipped wall times and distinguishes repeated ones
 See [hiring journeys](hiring-journeys.md) for reminder semantics, migration details
 and checks. The URL constraint is enforced in both application validation and SQL.
 
+## Employer portal vault
+
+`features/vault` owns a browser-only cryptography module and short-lived Argon2id
+Web Worker, controlled credential forms, encrypted Server Actions and reads.
+The server-rendered page supplies wrapped keys and metadata; sensitive forms
+appear only after hydration and submit exclusively to client callbacks. They have
+no named input fields or Server Action bindings. No browser Supabase client or
+change to the HttpOnly authentication cookies is required.
+
+A random AES-256-GCM data key encrypts every portal field. Each operation has a
+fresh 96-bit nonce, a 128-bit authentication tag, and additional authenticated data
+binding the owner, vault, format and record/purpose. Argon2id v1.3 derives a wrapping
+key from a separate passphrase using 64 MiB, three iterations, four lanes and a
+random 128-bit salt. A separate random 256-bit recovery secret wraps the same data
+key. The server stores both envelopes and exact versioned parameters, never the
+passphrase, recovery secret, plaintext data key or decrypted portal fields.
+
+The active key and decrypted page are held only in the mounted vault component.
+Navigation, hidden tabs, page lifecycle events, sign-out/lock broadcasts and five
+minutes of inactivity clear state and terminate derivation. Identity and vault
+revision are rechecked before unlock completes and before sensitive operations,
+on focus, and periodically. Generation checks prevent late asynchronous work
+from reopening a locked page. Reveal expires after 15 seconds; the system
+clipboard is independent of locking.
+
+`credential_vaults`, `portal_accounts` and `application_portals` have explicit
+privileges, RLS and composite ownership foreign keys. Invoker RPCs provide atomic
+account-plus-link creation and filtered pagination. Immutable identities and
+forced revisions reject stale edits/deletes. Deleting an application removes only
+links; deleting a portal or resetting a vault cascades its links. No plaintext
+fields are needed to show a linked-account count on an application page.
+
+See [the employer vault guide](employer-vault.md) for exact setup, recovery,
+cryptographic boundaries, limitations and hosted verification. Credentials must
+never enter future AI requests, logs, analytics or session-replay tools.
+
 ## Planned boundaries
 
 These are design constraints for later milestones, not implemented guarantees.
-
-### Portal credentials
-
-Portal links and accounts can be shared across a user's applications. The planned
-vault encrypts credentials in the browser with a random AES-256-GCM data key.
-The key is wrapped using a key derived from a separate vault passphrase with
-Argon2id, with a separate recovery-key mechanism. The server stores ciphertext,
-wrapped keys, and versioned parameters. Unlocked keys stay in memory.
-
-Credentials must never enter AI requests, application logs, or analytics.
-Account password resets cannot decrypt the vault. Losing both vault passphrase
-and recovery key means losing access to the encrypted credentials. This design
-does not protect against a compromised browser or malicious frontend code;
-cryptographic parameters and recovery flows require dedicated review and tests.
 
 ### Resume and AI processing
 

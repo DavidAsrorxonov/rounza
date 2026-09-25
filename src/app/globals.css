@@ -4,6 +4,7 @@
 @import "./account.css";
 @import "./tracking.css";
 @import "./journey.css";
+@import "./vault.css";
 
 @theme inline {
   --color-background: var(--background);

@@ -2,13 +2,14 @@
 
 A thoughtful home for your job search, from the first application to the final round.
 
-**Current scope: milestones 1–5 — private hiring journeys and a public demo.**
+**Current scope: milestones 1–6 — hiring journeys, an encrypted portal vault, and a public demo.**
 Sign in with Google to save applications, update their details/status, search and
 filter your records, and use list or board views. Your overview shows current
 counts, next actions, and recently updated applications. Each opportunity supports
 custom interview/assessment rounds, rescheduling history, preparation tasks and
-contacts. The fictional demo remains independent. The encrypted vault and AI follow
-in later milestones.
+contacts. Reusable employer portal accounts are encrypted in the browser and
+unlocked with a separate vault passphrase or recovery key. The fictional demo
+remains independent. Resume and AI features follow in later milestones.
 
 ## Run locally
 
@@ -47,7 +48,8 @@ Supabase project and Google provider configuration. Follow the
 migrations, both OAuth callbacks, and a real sign-in checklist. Existing setups
 must apply all pending migrations with `db push` before starting this version.
 See the [tracking guide](docs/application-tracking.md) and
-[hiring journeys guide](docs/hiring-journeys.md) for behavior and verification.
+[hiring journeys guide](docs/hiring-journeys.md), and
+[employer vault guide](docs/employer-vault.md) for behavior and verification.
 
 Local environment files are ignored by Git. Never commit secrets or place them
 in a variable prefixed `NEXT_PUBLIC_`.
@@ -63,7 +65,7 @@ in a variable prefixed `NEXT_PUBLIC_`.
 | `npm run format`    | Apply Prettier formatting                            |
 | `npm test`          | Run Playwright against the existing production build |
 | `npm run test:ui`   | Open Playwright's interactive test runner            |
-| `npm run test:unit` | Test configuration and date validation               |
+| `npm run test:unit` | Test configuration, dates, and vault cryptography    |
 | `npm run test:db`   | Apply migrations and test database isolation         |
 | `npm run verify`    | Check, test, build, and run browser tests            |
 
@@ -95,6 +97,7 @@ src/
   features/demo/    Fictional data, validated tab state, and interactive screens
   features/applications/  Private records, forms, validation, and server operations
   features/journey/  Rounds, tasks, contacts, schedule history, and next actions
+  features/vault/    Browser encryption, portal accounts, and encrypted server operations
   lib/auth/         Verified account reads and server auth actions
   lib/supabase/     Server client, configuration, and database types
 supabase/            Versioned schema and row-level access policies

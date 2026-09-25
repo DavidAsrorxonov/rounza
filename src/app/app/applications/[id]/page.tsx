@@ -1,3 +1,4 @@
+import { ApplicationPortals } from "@/features/vault/application-links";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowUpRight, MapPin, Pencil } from "lucide-react";
@@ -77,6 +78,7 @@ export default async function ApplicationPage({
           contacts: pageNumber(query.contacts),
         }}
       />
+      <ApplicationPortals applicationId={application.id} />
       <div className="tracking-detail-grid">
         <div className="space-y-6 min-w-0">
           <section className="tracking-detail-panel">

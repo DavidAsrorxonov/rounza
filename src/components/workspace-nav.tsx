@@ -5,6 +5,7 @@ import {
   LayoutDashboard,
   BriefcaseBusiness,
   CalendarClock,
+  LockKeyhole,
 } from "lucide-react";
 export function WorkspaceNav() {
   const pathname = usePathname();
@@ -29,6 +30,13 @@ export function WorkspaceNav() {
       >
         <CalendarClock size={16} aria-hidden="true" />
         Next actions
+      </Link>
+      <Link
+        href="/app/portals"
+        aria-current={pathname === "/app/portals" ? "page" : undefined}
+      >
+        <LockKeyhole size={16} aria-hidden="true" />
+        Portals & vault
       </Link>
     </nav>
   );

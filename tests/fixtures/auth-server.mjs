@@ -1,3 +1,4 @@
+import { handleVault, cascadeVaultApplication } from "./vault-server.mjs";
 // Loopback-only OAuth/Auth/PostgREST protocol fixture; never loaded by the app.
 // It tests the real Supabase SDK's PKCE/cookies/refresh against deterministic HTTP.
 // Database authorization is tested separately against actual Postgres.
@@ -178,6 +179,8 @@ createServer(async (request, response) => {
   }
   if (account.databaseError)
     return json(response, 503, { message: "Fixture database unavailable" });
+  if (await handleVault(request, response, url, account, applications, json))
+    return;
   if (await handleJourney(request, response, url, account, applications, json))
     return;
   if (url.pathname === "/rest/v1/profiles") {
@@ -266,6 +269,7 @@ createServer(async (request, response) => {
         if (request.method === "DELETE") {
           applications.delete(row.id);
           cascadeJourney(row.id);
+          cascadeVaultApplication(row.id);
         } else
           applications.set(row.id, {
             ...row,

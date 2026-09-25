@@ -194,7 +194,12 @@ test("setup, encrypted persistence, reveal and copy never send plaintext to the 
     .getByRole("button", { name: "Save portal account", exact: true })
     .click();
   await expect(
-    page.getByText("Updated encrypted context", { exact: true }),
+    page.getByText("Portal account saved with encryption.", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole("list", { name: "Saved portal accounts", exact: true })
+      .getByText("Updated encrypted context", { exact: true }),
   ).toBeVisible();
   const updated = await state(request, session.access_token);
   expect(updated.portal_accounts[0].revision).toBe(2);
@@ -388,6 +393,12 @@ test("password reveal expires, idle and hidden pages lock, and navigation clears
     .getByLabel("Portal password", { exact: true })
     .fill("Unsaved-secret-marker");
   await page.getByRole("link", { name: "Overview", exact: true }).click();
+  await expect(
+    page.getByRole("heading", {
+      name: "A little closer to what’s next.",
+      exact: true,
+    }),
+  ).toBeVisible();
   await page
     .getByRole("link", { name: "Portals & vault", exact: true })
     .click();
@@ -602,7 +613,7 @@ test("encrypted pagination isolates damaged records and reset keeps applications
   });
   await page.goto(`/app/applications/${app}`);
   await expect(
-    page.getByRole("heading", { name: "Keep application", exact: true }),
+    page.getByText("Keep application", { exact: true }),
   ).toBeVisible();
 });
 

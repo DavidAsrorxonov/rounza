@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
@@ -229,6 +230,10 @@ export function VaultClient({
       await showPage(activeKey, current.id, nextPage, linkedOnly, stamp);
     });
 
+  // Clear state before a route is hidden, including React Activity preservation.
+  // Dropping only the key ref would leave decrypted forms in retained React state.
+  useLayoutEffect(() => () => lock(), [lock]);
+
   useEffect(() => {
     lastActivity.current = Date.now();
     const hidden = () => {
@@ -298,9 +303,6 @@ export function VaultClient({
       window.addEventListener(event, activity, { passive: true });
     return () => {
       stopped = true;
-      generation.current += 1;
-      abort.current.abort();
-      key.current = null;
       clearInterval(idle);
       clearInterval(poll);
       channel?.close();

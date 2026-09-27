@@ -245,13 +245,26 @@ test("failed writes retain text and changing account prevents saving the old dra
   await expect(page.getByLabel("Resume text (required)")).toHaveValue(
     "Do not lose this text",
   );
+  await expect(page.getByLabel(reviewed)).toBeChecked();
+  await signIn(context, request, owner.user.id);
+  await page.getByRole("button", { name: "Save resume", exact: true }).click();
+  await expect(page.getByText("Resume saved.", { exact: true })).toBeVisible();
+  const rows = await saved(request, owner.access_token);
+  expect(rows).toHaveLength(1);
+  expect(rows[0].body).toBe("Do not lose this text");
+  await page.goto("/app/resumes/new");
+  await page.getByLabel("Resume name (required)").fill("Another private draft");
+  await page
+    .getByLabel("Resume text (required)")
+    .fill("Must stay with its owner");
+  await page.getByLabel(reviewed).check();
   const other = await signIn(context, request);
   await page.getByRole("button", { name: "Save resume", exact: true }).click();
   await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "Your account changed",
   );
   expect(await saved(request, other.access_token)).toHaveLength(0);
-  expect(await saved(request, owner.access_token)).toHaveLength(0);
+  expect(await saved(request, owner.access_token)).toHaveLength(1);
 });
 test("stale edits and deletion confirmations cannot replace newer resume text", async ({
   page,

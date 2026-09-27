@@ -104,7 +104,13 @@ export function ResumeForm({
   }
   const cancelHref = resume ? `/app/resumes/${id}` : "/app/resumes";
   return (
-    <form action={action} className="tracking-form resume-form">
+    <form
+      action={action}
+      className="tracking-form resume-form"
+      // React resets forms after a resolved action, including a failed save.
+      // Keep the review checkbox and draft together so a retry can submit.
+      onReset={(event) => event.preventDefault()}
+    >
       {state.message && (
         <div
           ref={errors}

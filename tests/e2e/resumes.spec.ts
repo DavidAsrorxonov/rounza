@@ -219,7 +219,9 @@ test("unsupported, empty, damaged, scanned, protected and oversized files preser
   ];
   for (const item of cases) {
     await file(page, item.name, item.data);
-    await expect(page.getByRole("alert")).toContainText(item.message);
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
+      item.message,
+    );
     await expect(page.getByLabel("Resume text (required)")).toHaveValue(
       "Keep this draft",
     );
@@ -237,7 +239,7 @@ test("failed writes retain text and changing account prevents saving the old dra
   await page.getByLabel(reviewed).check();
   await signIn(context, request, owner.user.id, "&writeError=1");
   await page.getByRole("button", { name: "Save resume", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText(
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
     "We couldn’t save this resume",
   );
   await expect(page.getByLabel("Resume text (required)")).toHaveValue(
@@ -245,7 +247,9 @@ test("failed writes retain text and changing account prevents saving the old dra
   );
   const other = await signIn(context, request);
   await page.getByRole("button", { name: "Save resume", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("Your account changed");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "Your account changed",
+  );
   expect(await saved(request, other.access_token)).toHaveLength(0);
   expect(await saved(request, owner.access_token)).toHaveLength(0);
 });
@@ -271,7 +275,9 @@ test("stale edits and deletion confirmations cannot replace newer resume text", 
   await page.getByLabel("Resume text (required)").fill("Stale draft");
   await page.getByLabel(reviewed).check();
   await page.getByRole("button", { name: "Save changes", exact: true }).click();
-  await expect(page.getByRole("alert")).toContainText("This resume changed");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "This resume changed",
+  );
   await expect(page.getByLabel("Resume text (required)")).toHaveValue(
     "Stale draft",
   );
@@ -370,7 +376,9 @@ test("cancelled and timed-out imports clear pending work without replacing text"
     page.getByText("Reading your file on this device…", { exact: true }),
   ).toBeVisible();
   await page.clock.fastForward(31000);
-  await expect(page.getByRole("alert")).toContainText("Import took too long");
+  await expect(page.getByRole("main").getByRole("alert")).toContainText(
+    "Import took too long",
+  );
   await expect(page.getByLabel("Resume text (required)")).toHaveValue(
     "Keep local draft",
   );

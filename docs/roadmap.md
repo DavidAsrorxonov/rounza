@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-Milestones 1–6 are included in this implementation. Later milestones start when
+Milestones 1–7 are included in this implementation. Later milestones start when
 requested. Each milestone should deliver a working result and relevant checks.
 
 | Milestone                         | Result                                                                                                                                            |
@@ -101,6 +101,24 @@ requested. Each milestone should deliver a working result and relevant checks.
   recovery, shared accounts, locking, damaged records and plaintext boundaries.
 - The vault guide documents setup, recovery limitations, threat boundaries and
   the hosted acceptance checklist. An independent security audit is not implied.
+
+## Milestone 7 acceptance
+
+- Signed-in users can keep multiple named resume versions, view/edit their text,
+  and permanently delete a version after confirmation.
+- PDF and DOCX files are parsed locally with bounded inputs and cancellable workers.
+  Original files are never uploaded or stored. Paste remains available without import.
+- Extracted text appears in a preview and requires explicit adoption before it
+  replaces a draft. All text must be reviewed and confirmed before saving.
+- Empty, corrupt, unsupported, scanned, protected, oversized and timed-out imports
+  show actionable errors and preserve existing drafts. Partial extraction warns
+  about missing content and layout/reading-order limits.
+- Private records enforce ownership, RLS, immutable identity, bounded fields,
+  generated character counts, and revisions for stale edit/delete protection.
+- The library paginates summaries without loading full resume text. Account changes
+  cannot save a draft into a different account.
+- Unit, database and desktop/mobile browser tests cover imports and CRUD flows.
+  Setup documentation includes the new migration and hosted acceptance checklist.
 
 ## Product scope
 

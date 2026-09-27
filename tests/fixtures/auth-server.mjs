@@ -1,3 +1,4 @@
+import { handleResumes } from "./resume-server.mjs";
 import { handleVault, cascadeVaultApplication } from "./vault-server.mjs";
 // Loopback-only OAuth/Auth/PostgREST protocol fixture; never loaded by the app.
 // It tests the real Supabase SDK's PKCE/cookies/refresh against deterministic HTTP.
@@ -179,6 +180,7 @@ createServer(async (request, response) => {
   }
   if (account.databaseError)
     return json(response, 503, { message: "Fixture database unavailable" });
+  if (await handleResumes(request, response, url, account, json)) return;
   if (await handleVault(request, response, url, account, applications, json))
     return;
   if (await handleJourney(request, response, url, account, applications, json))

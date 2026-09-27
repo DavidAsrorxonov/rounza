@@ -1,3 +1,4 @@
+import type { Resume, ResumeFields } from "@/features/resumes/model";
 import type {
   VaultRecord,
   PortalRecord,
@@ -107,6 +108,12 @@ type JourneyTable<T extends JourneyRecord, K extends keyof T> = {
 export type Database = {
   public: {
     Tables: {
+      resumes: {
+        Row: Resume;
+        Insert: ResumeFields & { id?: string; user_id: string };
+        Update: Partial<ResumeFields>;
+        Relationships: [];
+      };
       credential_vaults: {
         Row: VaultRecord;
         Insert: Omit<VaultRecord, "revision" | "created_at" | "updated_at">;

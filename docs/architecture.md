@@ -181,15 +181,38 @@ See [the employer vault guide](employer-vault.md) for exact setup, recovery,
 cryptographic boundaries, limitations and hosted verification. Credentials must
 never enter future AI requests, logs, analytics or session-replay tools.
 
+## Resume library
+
+`features/resumes` owns local import, reviewed text forms, server operations and
+reads. `/app/resumes` lists paginated summaries; full text is fetched only for
+an owned detail/edit page. `resumes` stores name, reviewed text, source category,
+revision and dates, plus a database-generated character count. Original files
+and filenames have no storage bucket or upload endpoint. A filename may seed the
+editable name; only its reviewed final value is persisted.
+
+PDF.js reads byte data using a bundled worker. DOCX extraction runs Mammoth's
+browser entry in a separate worker after fflate bounds/repackages XML data.
+Neither converter renders document HTML or opens document links. Import buffers,
+previews and unsaved drafts stay in memory. Limits and a 30-second cancellation
+boundary prevent indefinite work; navigation and replacement cancel pending imports.
+The text preview is separate from the active draft and must be explicitly adopted.
+Saving requires a reviewed checkbox, which clears on any text change.
+
+Server Actions verify the current owner, allowed fields, review acknowledgement,
+UUID and revision; RLS and immutable-identity/revision triggers apply to direct
+API clients too. Failures preserve controlled form values. Resume text is ordinary
+private account data, not part of the encrypted credential vault. Future AI code
+can use this reviewed text only within the later authorized analysis flow.
+See [the resume library guide](resume-library.md) for limits, setup and verification.
+
 ## Planned boundaries
 
 These are design constraints for later milestones, not implemented guarantees.
 
-### Resume and AI processing
+### AI processing
 
-Resume text will be extracted locally from text-based PDF, DOCX, or pasted text,
-reviewed by the user, and saved as text. Scanned documents and legacy DOC files
-are outside the initial scope.
+The resume library supplies reviewed text. Scanned documents and legacy DOC files
+remain outside the initial scope.
 
 OpenAI requests will originate on the server. The proposed limits are five AI
 requests per user per day and a configurable $5 application-wide monthly budget,

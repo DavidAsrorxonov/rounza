@@ -2,14 +2,15 @@
 
 A thoughtful home for your job search, from the first application to the final round.
 
-**Current scope: milestones 1–6 — hiring journeys, an encrypted portal vault, and a public demo.**
+**Current scope: milestones 1–7 — hiring journeys, an encrypted portal vault, a resume library, and a public demo.**
 Sign in with Google to save applications, update their details/status, search and
 filter your records, and use list or board views. Your overview shows current
 counts, next actions, and recently updated applications. Each opportunity supports
 custom interview/assessment rounds, rescheduling history, preparation tasks and
 contacts. Reusable employer portal accounts are encrypted in the browser and
 unlocked with a separate vault passphrase or recovery key. The fictional demo
-remains independent. Resume and AI features follow in later milestones.
+remains independent. The resume library imports text from PDF/DOCX on your device or accepts pasted text,
+then saves the version you review. AI analysis follows in the next milestone.
 
 ## Run locally
 
@@ -47,9 +48,10 @@ Supabase project and Google provider configuration. Follow the
 [accounts setup guide](docs/accounts-setup.md), which covers environment values,
 migrations, both OAuth callbacks, and a real sign-in checklist. Existing setups
 must apply all pending migrations with `db push` before starting this version.
-See the [tracking guide](docs/application-tracking.md) and
-[hiring journeys guide](docs/hiring-journeys.md), and
-[employer vault guide](docs/employer-vault.md) for behavior and verification.
+See the [tracking guide](docs/application-tracking.md),
+[hiring journeys guide](docs/hiring-journeys.md),
+[employer vault guide](docs/employer-vault.md), and
+[resume library guide](docs/resume-library.md) for behavior and verification.
 
 Local environment files are ignored by Git. Never commit secrets or place them
 in a variable prefixed `NEXT_PUBLIC_`.
@@ -98,6 +100,7 @@ src/
   features/applications/  Private records, forms, validation, and server operations
   features/journey/  Rounds, tasks, contacts, schedule history, and next actions
   features/vault/    Browser encryption, portal accounts, and encrypted server operations
+  features/resumes/  Local PDF/DOCX import, reviewed resume text, and private records
   lib/auth/         Verified account reads and server auth actions
   lib/supabase/     Server client, configuration, and database types
 supabase/            Versioned schema and row-level access policies

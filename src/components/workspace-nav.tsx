@@ -6,6 +6,7 @@ import {
   BriefcaseBusiness,
   CalendarClock,
   LockKeyhole,
+  FileText,
 } from "lucide-react";
 export function WorkspaceNav() {
   const pathname = usePathname();
@@ -37,6 +38,13 @@ export function WorkspaceNav() {
       >
         <LockKeyhole size={16} aria-hidden="true" />
         Portals & vault
+      </Link>
+      <Link
+        href="/app/resumes"
+        aria-current={pathname.startsWith("/app/resumes") ? "page" : undefined}
+      >
+        <FileText size={16} aria-hidden="true" />
+        Resumes
       </Link>
     </nav>
   );

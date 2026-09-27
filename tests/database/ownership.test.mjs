@@ -1,3 +1,4 @@
+import { resumeChecks } from "./resume-checks.mjs";
 import { vaultChecks } from "./vault-checks.mjs";
 import { journeyChecks } from "./journey-checks.mjs";
 import assert from "node:assert/strict";
@@ -369,6 +370,7 @@ test("private records enforce ownership in Postgres", async (t) => {
     );
     await journeyChecks(t, db, as, alice, bob, app, bobApp);
     await vaultChecks(t, db, as, alice, bob, app, bobApp);
+    await resumeChecks(t, db, as, alice, bob);
     await t.test(
       "database constraints reject invalid records and owners can delete",
       async () => {
@@ -403,6 +405,7 @@ test("private records enforce ownership in Postgres", async (t) => {
         await db.query("reset role");
         await db.query("delete from auth.users where id=$1", [bob]);
         for (const table of [
+          "resumes",
           "credential_vaults",
           "portal_accounts",
           "application_portals",

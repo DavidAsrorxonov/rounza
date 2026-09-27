@@ -5,6 +5,7 @@
 @import "./tracking.css";
 @import "./journey.css";
 @import "./vault.css";
+@import "./resumes.css";
 
 @theme inline {
   --color-background: var(--background);

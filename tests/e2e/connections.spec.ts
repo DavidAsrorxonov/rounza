@@ -256,6 +256,7 @@ test("stale permission forms cannot overwrite a newer grant", async ({
   await expect(page).toHaveURL(/result=approve/);
   await page.goto("/app/ai-connections");
   await page.getByRole("link", { name: "Manage access", exact: true }).click();
+  await expect(page).toHaveURL(/\/app\/ai-connections\/[0-9a-f-]+$/);
   const other = await context.newPage();
   await other.goto(page.url());
   await other

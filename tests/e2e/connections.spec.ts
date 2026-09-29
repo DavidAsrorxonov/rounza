@@ -265,8 +265,10 @@ test("stale permission forms cannot overwrite a newer grant", async ({
   await other.getByRole("button", { name: "Save permissions" }).click();
   await expect(other).toHaveURL(/updated=1/);
   await page.getByRole("button", { name: "Save permissions" }).click();
-  await expect(page.getByRole("alert")).toContainText(
-    "Permissions couldn’t be saved",
-  );
+  await expect(
+    page
+      .getByRole("alert")
+      .filter({ hasText: "Permissions couldn’t be saved" }),
+  ).toContainText("Permissions couldn’t be saved");
   await other.close();
 });

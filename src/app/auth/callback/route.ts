@@ -1,11 +1,23 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseConfig } from "@/lib/supabase/config";
+import { cookies } from "next/headers";
+import { consentDestination } from "@/features/connections/model";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const config = getSupabaseConfig();
   const supabase = await createClient();
+  const cookieStore = await cookies();
+  const pending = cookieStore.get("rounza-consent-return")?.value;
+  const match = pending?.match(
+    /^\/auth\/consent\?authorization_id=([a-fA-F0-9-]+)$/,
+  );
+  const returnTo = consentDestination(match?.[1]);
+  cookieStore.set("rounza-consent-return", "", {
+    path: "/auth/callback",
+    maxAge: 0,
+  });
   let destination = "/login?error=callback";
   if (!config || !supabase) destination = "/login?error=configuration";
   else if (url.searchParams.has("error")) destination = "/login?error=denied";
@@ -13,7 +25,7 @@ export async function GET(request: Request) {
     const code = url.searchParams.get("code");
     if (code) {
       const { error } = await supabase.auth.exchangeCodeForSession(code);
-      if (!error) destination = "/app";
+      if (!error) destination = returnTo ?? "/app";
     }
   }
   // Fixed destinations and a configured origin prevent open/forwarded-host redirects.

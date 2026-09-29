@@ -1,0 +1,125 @@
+.connection-guide,
+.connection-list,
+.connection-revoke {
+  margin: 24px 0;
+  padding: 28px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--background);
+}
+.connection-guide h2,
+.connection-list h2,
+.connection-revoke h2 {
+  font-size: 1.3rem;
+  font-weight: 650;
+  margin-bottom: 14px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.connection-guide p,
+.connection-guide ol,
+.connection-revoke p {
+  margin: 16px 0;
+  line-height: 1.7;
+}
+.connection-guide ol {
+  padding-left: 24px;
+  list-style: decimal;
+}
+.connection-guide a,
+.connection-list a {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.connection-guide p svg {
+  display: inline;
+  vertical-align: middle;
+}
+.connection-list ul {
+  list-style: none;
+  padding: 0;
+}
+.connection-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  border-top: 1px solid var(--border);
+  padding: 22px 0;
+}
+.connection-list h3 {
+  font-weight: 650;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+}
+.connection-list p {
+  line-height: 1.7;
+}
+.connection-form {
+  max-width: 850px;
+}
+.connection-form fieldset {
+  min-width: 0;
+}
+.connection-picker {
+  margin-top: 18px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.connection-picker ul {
+  list-style: none;
+  padding: 0;
+  margin: 14px 0;
+}
+.connection-check {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  font-weight: 400;
+}
+.connection-check input {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 3px;
+  accent-color: var(--primary);
+}
+.connection-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+.connection-id {
+  overflow-wrap: anywhere;
+}
+.connection-consent {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+@media (max-width: 640px) {
+  .connection-guide,
+  .connection-list,
+  .connection-revoke {
+    padding: 20px;
+  }
+  .connection-list li {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .connection-picker {
+    padding: 14px;
+  }
+  .connection-pagination {
+    font-size: 0.85rem;
+  }
+}

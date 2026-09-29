@@ -39,6 +39,7 @@ export default defineConfig({
         SUPABASE_URL: "http://127.0.0.1:54329",
         SUPABASE_PUBLISHABLE_KEY: "sb_publishable_local_auth_fixture",
         SITE_URL: "http://127.0.0.1:3102",
+        MCP_ENABLED: "true",
       },
     },
   ],

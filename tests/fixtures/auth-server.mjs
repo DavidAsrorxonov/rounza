@@ -1,18 +1,33 @@
 import { handleResumes } from "./resume-server.mjs";
+import { handleConnections, allowedRecord } from "./connection-server.mjs";
 import { handleVault, cascadeVaultApplication } from "./vault-server.mjs";
 // Loopback-only OAuth/Auth/PostgREST protocol fixture; never loaded by the app.
 // It tests the real Supabase SDK's PKCE/cookies/refresh against deterministic HTTP.
 // Database authorization is tested separately against actual Postgres.
 import { handleJourney, cascadeJourney } from "./journey-server.mjs";
 import { createServer } from "node:http";
-import { createHash, createHmac, randomUUID } from "node:crypto";
+import {
+  createHash,
+  generateKeyPairSync,
+  sign,
+  verify,
+  randomUUID,
+} from "node:crypto";
 
 const origin = "http://127.0.0.1:54329";
 const applications = new Map();
 const codes = new Map();
 const refreshTokens = new Map();
 const sessions = new Map();
-const secret = "local-auth-fixture-only-never-a-production-secret";
+const { privateKey, publicKey } = generateKeyPairSync("rsa", {
+  modulusLength: 2048,
+});
+const jwk = {
+  ...publicKey.export({ format: "jwk" }),
+  kid: "local-fixture",
+  alg: "RS256",
+  use: "sig",
+};
 const users = {
   alice: {
     id: "11111111-1111-4111-8111-111111111111",
@@ -37,22 +52,31 @@ function session(user, options = {}) {
   const now = Math.floor(Date.now() / 1000);
   const payload = {
     sub: user.id,
-    aud: "authenticated",
+    aud: options.clientId ? "http://127.0.0.1:3102/mcp" : "authenticated",
+    is_anonymous: false,
+    ...(options.clientId ? { client_id: options.clientId } : {}),
     role: "authenticated",
     exp: now + (options.expired ? -60 : 3600),
     iat: now - 120,
     iss: `${origin}/auth/v1`,
     session_id: sessionId,
   };
-  const parts = [{ alg: "HS256", typ: "JWT" }, payload].map((part) =>
-    Buffer.from(JSON.stringify(part)).toString("base64url"),
-  );
+  const parts = [
+    { alg: "RS256", typ: "JWT", kid: "local-fixture" },
+    { ...payload, ...options.claims },
+  ].map((part) => Buffer.from(JSON.stringify(part)).toString("base64url"));
   const data = parts.join(".");
-  const accessToken = `${data}.${createHmac("sha256", secret).update(data).digest("base64url")}`;
+  const accessToken = `${data}.${sign("RSA-SHA256", Buffer.from(data), privateKey).toString("base64url")}`;
   const refreshToken = randomUUID();
-  refreshTokens.set(refreshToken, { user, sessionId });
+  refreshTokens.set(refreshToken, {
+    user,
+    sessionId,
+    clientId: options.clientId,
+  });
   sessions.set(sessionId, {
     user,
+    clientId: options.clientId,
+    createdAt: sessions.get(sessionId)?.createdAt ?? Date.now(),
     databaseError: options.databaseError ?? false,
     writeError: options.writeError ?? false,
   });
@@ -77,9 +101,12 @@ function identity(request) {
     const token = request.headers.authorization?.replace(/^Bearer /, "") ?? "";
     const [header, data, signature] = token.split(".");
     if (
-      createHmac("sha256", secret)
-        .update(`${header}.${data}`)
-        .digest("base64url") !== signature
+      !verify(
+        "RSA-SHA256",
+        Buffer.from(`${header}.${data}`),
+        publicKey,
+        Buffer.from(signature, "base64url"),
+      )
     )
       return null;
     const payload = JSON.parse(Buffer.from(data, "base64url").toString());
@@ -94,6 +121,10 @@ function identity(request) {
 createServer(async (request, response) => {
   const url = new URL(request.url, origin);
   if (url.pathname === "/health") return json(response, 200, { ready: true });
+  if (url.pathname === "/auth/v1/.well-known/jwks.json")
+    return json(response, 200, { keys: [jwk] });
+  if (url.pathname === "/fixture/connected")
+    return json(response, 200, { result: url.searchParams.get("result") });
   if (url.pathname === "/auth/v1/authorize") {
     if (
       url.searchParams.get("provider") !== "google" ||
@@ -138,7 +169,11 @@ createServer(async (request, response) => {
         msg: "Invalid refresh token",
         code: "refresh_token_not_found",
       });
-    return json(response, 200, session(old.user, { sessionId: old.sessionId }));
+    return json(
+      response,
+      200,
+      session(old.user, { sessionId: old.sessionId, clientId: old.clientId }),
+    );
   }
   // Test-only seeding: no production application endpoints or bypass switches.
   if (url.pathname === "/fixture/session") {
@@ -171,6 +206,33 @@ createServer(async (request, response) => {
   const account = identity(request);
   if (!account)
     return json(response, 401, { msg: "Invalid session", code: "bad_jwt" });
+  if (url.pathname === "/fixture/delegated")
+    return json(
+      response,
+      200,
+      session(account.user, {
+        clientId: url.searchParams.get("client_id"),
+        expired: url.searchParams.has("expired"),
+        claims: url.searchParams.has("wrongAudience")
+          ? { aud: "authenticated" }
+          : undefined,
+      }),
+    );
+  if (
+    await handleConnections(
+      request,
+      response,
+      url,
+      account,
+      json,
+      (userId, clientId) => {
+        for (const [id, s] of sessions)
+          if (s.user.id === userId && s.clientId === clientId)
+            sessions.delete(id);
+      },
+    )
+  )
+    return;
   if (url.pathname === "/auth/v1/user")
     return json(response, 200, { ...account.user, is_anonymous: false });
   if (url.pathname === "/auth/v1/logout") {
@@ -180,6 +242,14 @@ createServer(async (request, response) => {
   }
   if (account.databaseError)
     return json(response, 503, { message: "Fixture database unavailable" });
+  if (
+    account.clientId &&
+    ((request.method !== "GET" &&
+      !url.pathname.startsWith("/rest/v1/rpc/search_applications") &&
+      !url.pathname.startsWith("/rest/v1/rpc/next_actions")) ||
+      /vault|portal|profiles/.test(url.pathname))
+  )
+    return json(response, 403, { message: "Delegated access denied" });
   if (await handleResumes(request, response, url, account, json)) return;
   if (await handleVault(request, response, url, account, applications, json))
     return;
@@ -253,7 +323,9 @@ createServer(async (request, response) => {
     if (url.searchParams.get("user_id") !== `eq.${account.user.id}`)
       return json(response, 403, { message: "Missing ownership filter" });
     let rows = [...applications.values()].filter(
-      (row) => row.user_id === account.user.id,
+      (row) =>
+        row.user_id === account.user.id &&
+        allowedRecord(account, "application", row.id),
     );
     for (const field of ["id", "status", "revision"]) {
       const value = url.searchParams.get(field);

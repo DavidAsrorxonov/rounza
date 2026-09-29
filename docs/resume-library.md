@@ -3,7 +3,8 @@
 Milestone 7 adds named, private resume versions at `/app/resumes`. Import a
 text-based PDF or DOCX on your device, or paste text, review it, and explicitly
 save the version you want to keep. You can edit, replace text, or delete it later.
-Resume analysis and job matching belong to milestone 8.
+Step 8 allows separately authorized assistants to read reviewed resume text.
+Resume tailoring and comparisons belong to milestone 12 in the revised roadmap.
 
 ## Setup
 

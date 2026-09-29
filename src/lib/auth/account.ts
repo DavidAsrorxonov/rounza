@@ -10,6 +10,17 @@ export const getAccount = cache(async () => {
   // Never authorize using the unverified user embedded in a session cookie.
   const { data, error } = await supabase.auth.getUser();
   if (error || !data.user || data.user.is_anonymous) return null;
+  const { data: verified, error: claimsError } =
+    await supabase.auth.getClaims();
+  // An OAuth token is never a website login, even if copied into a session cookie.
+  if (
+    claimsError ||
+    !verified ||
+    verified.claims.sub !== data.user.id ||
+    verified.claims.client_id !== undefined ||
+    verified.claims.aud !== "authenticated"
+  )
+    return null;
   return { supabase, user: data.user };
 });
 

@@ -12,7 +12,7 @@
 - Strict TypeScript, Next's ESLint rules, consistent formatting, and browser tests
   against the production server. CI and local verification use the same commands.
 - Supabase handles private accounts and database requests when configured. Employer portal
-  data is encrypted in the browser. No live AI or deployment is configured.
+  data is encrypted in the browser. Remote read-only MCP is available when OAuth and hosting are configured.
 
 ESLint is pinned to 9.39.5 because the React plugin bundled with Next.js 16.3.5's
 ESLint config fails under ESLint 10. Revisit the pin when that configuration
@@ -51,14 +51,14 @@ inputs. These examples provide no vault or live-AI security guarantee.
 
 `/login` starts Google OAuth through a Server Action. Supabase SSR manages PKCE and
 HttpOnly, SameSite=Lax cookies (Secure with HTTPS). `/auth/callback` exchanges the
-code and redirects to a fixed `/app` destination on the configured `SITE_URL`.
+code and redirects to `/app` or a validated pending consent request on the configured `SITE_URL`.
 User-supplied return URLs, provider error text, and forwarded hosts never determine
 that destination. Sign-out is a POST Server Action scoped to this browser and
 invalidates Next's route cache. Next's Server Action origin checks remain enabled.
 
 `src/proxy.ts` refreshes sessions only for account/auth routes and marks responses
 private/no-store. Every private data accessor calls `requireAccount`, which uses
-Supabase `getUser`, not an unverified session-cookie user. React `cache` only
+Supabase `getUser` and verified claims, rejecting delegated OAuth clients as website sessions. React `cache` only
 memoizes the account within a server render; private pages are dynamic and never
 use a shared data cache. The public landing and demo make no Supabase requests.
 
@@ -205,22 +205,33 @@ private account data, not part of the encrypted credential vault. Future AI code
 can use this reviewed text only within the later authorized analysis flow.
 See [the resume library guide](resume-library.md) for limits, setup and verification.
 
+## AI connections and MCP
+
+`features/connections` owns browser consent and grant management. `lib/mcp` provides
+JWT authentication, six read-only tools and per-request SDK servers. The Next `/mcp`
+route uses stateless Streamable HTTP with JSON responses. Public protected-resource
+metadata points to the existing Supabase OAuth issuer. The operator enables DCR,
+PKCE, asymmetric signing and the custom token hook; Rounza does not implement its
+own authorization/token server. No model API is called and no model key is stored.
+
+`ai_connections` stores owner/client identity, application/resume grants, activation,
+revocation and revisions. Restrictive RLS policies AND these permissions with existing
+ownership policies. Delegated writes and vault/profile/grant reads are denied.
+Private SQL helpers check live Auth sessions and activation cutoffs. The token hook
+sets the resource audience for OAuth tokens only. MCP data access uses a publishable
+client with that verified bearer token, never a service-role client. See the
+[AI connections guide](ai-connections.md) for setup and security boundaries.
+
 ## Planned boundaries
 
-These are design constraints for later milestones, not implemented guarantees.
+Agent mutations begin with proposals in step 9, approved in the Rounza website.
+Proposals retain source references and base revisions; applying a batch is atomic
+and idempotent. Application packages preserve user-confirmed submitted snapshots;
+shared context contains approved career facts and summaries, not conversation sync.
+Resume/letter suggestions use supplied evidence and do not invent qualifications.
 
-### AI processing
-
-The resume library supplies reviewed text. Scanned documents and legacy DOC files
-remain outside the initial scope.
-
-OpenAI requests will originate on the server. The proposed limits are five AI
-requests per user per day and a configurable $5 application-wide monthly budget,
-with atomic reservations and usage reconciliation. Live AI requires login;
-the public demo uses labeled precomputed examples.
-
-Resume suggestions must be grounded in supplied information. Pasted recruiter
-messages go through a local credential review before transmission; proposed
-changes are reviewed by the user before application. Schema validation,
-ownership checks, idempotency, and stale-proposal checks belong on the server.
-No keys or model identifiers are wired in during the foundation milestone.
+Email integration is separate, later work. Manual imports precede background sync;
+mail stays outside MCP until human review. Gmail verification does not block core
+release. Native integration tokens require server encryption separate from the
+browser-only credential vault. Embedded BYOK chat and autonomous background AI
+processing are deferred beyond this roadmap.

@@ -131,5 +131,7 @@ In a restricted desktop sandbox that cannot register filesystem watchers, use
 launching, run the browser suite in GitHub Actions or a normal local terminal.
 
 See [the roadmap](docs/roadmap.md) for scope and
-[the architecture notes](docs/architecture.md) for boundaries. Vercel deployment
-and a custom domain are reserved for the release milestone.
+[the architecture notes](docs/architecture.md) for boundaries. Step 8 adds
+[AI connections and a read-only MCP server](docs/ai-connections.md), including
+Supabase OAuth and Vercel/rounza.app setup instructions. Live assistant testing
+requires a reachable HTTPS deployment; the full release remains a later milestone.

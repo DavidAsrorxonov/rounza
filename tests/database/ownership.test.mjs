@@ -1,4 +1,5 @@
 import { resumeChecks } from "./resume-checks.mjs";
+import { connectionChecks } from "./connection-checks.mjs";
 import { vaultChecks } from "./vault-checks.mjs";
 import { journeyChecks } from "./journey-checks.mjs";
 import assert from "node:assert/strict";
@@ -50,6 +51,7 @@ test("private records enforce ownership in Postgres", async (t) => {
   const bobApp = "44444444-4444-4444-8444-444444444444";
   const as = async (role, id = "") => {
     await db.query("reset role");
+    await db.query("select set_config('request.jwt.claims', '{}', false)");
     await db.query("select set_config('request.jwt.claim.sub', $1, false)", [
       id,
     ]);
@@ -63,13 +65,18 @@ test("private records enforce ownership in Postgres", async (t) => {
         if not exists (select from pg_roles where rolname = 'anon') then create role anon nologin; end if;
         if not exists (select from pg_roles where rolname = 'authenticated') then create role authenticated nologin; end if;
         if not exists (select from pg_roles where rolname = 'service_role') then create role service_role nologin bypassrls; end if;
+        if not exists (select from pg_roles where rolname = 'supabase_auth_admin') then create role supabase_auth_admin nologin; end if;
       end $$;
       create schema auth;
       create table auth.users (id uuid primary key, raw_user_meta_data jsonb default '{}');
+      create table auth.sessions (id uuid primary key, user_id uuid not null references auth.users(id) on delete cascade, oauth_client_id uuid, created_at timestamptz not null default clock_timestamp(), not_after timestamptz);
+      create function auth.jwt() returns jsonb language sql stable as
+        $$ select coalesce(nullif(current_setting('request.jwt.claims', true), '')::jsonb, '{}'::jsonb) $$;
       create function auth.uid() returns uuid language sql stable as
         $$ select nullif(current_setting('request.jwt.claim.sub', true), '')::uuid $$;
       grant usage on schema public, auth to anon, authenticated, service_role;
       grant execute on function auth.uid() to anon, authenticated, service_role;
+      grant execute on function auth.jwt() to anon, authenticated, service_role;
     `);
     await db.query("insert into auth.users values ($1, $2)", [
       alice,
@@ -371,6 +378,7 @@ test("private records enforce ownership in Postgres", async (t) => {
     await journeyChecks(t, db, as, alice, bob, app, bobApp);
     await vaultChecks(t, db, as, alice, bob, app, bobApp);
     await resumeChecks(t, db, as, alice, bob);
+    await connectionChecks(t, db, as, alice, bob);
     await t.test(
       "database constraints reject invalid records and owners can delete",
       async () => {

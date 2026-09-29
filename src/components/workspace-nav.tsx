@@ -7,6 +7,7 @@ import {
   CalendarClock,
   LockKeyhole,
   FileText,
+  Plug,
 } from "lucide-react";
 export function WorkspaceNav() {
   const pathname = usePathname();
@@ -45,6 +46,14 @@ export function WorkspaceNav() {
       >
         <FileText size={16} aria-hidden="true" />
         Resumes
+      </Link>
+      <Link
+        href="/app/ai-connections"
+        aria-current={
+          pathname.startsWith("/app/ai-connections") ? "page" : undefined
+        }
+      >
+        <Plug size={16} aria-hidden="true" /> AI connections
       </Link>
     </nav>
   );

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { allowedRecord } from "./connection-server.mjs";
 const resumes = new Map();
 export async function handleResumes(request, response, url, account, json) {
   const fixture = url.pathname === "/fixture/resumes";
@@ -14,7 +15,11 @@ export async function handleResumes(request, response, url, account, json) {
     body = JSON.parse(Buffer.concat(chunks).toString());
   }
   const own = () =>
-    [...resumes.values()].filter((row) => row.user_id === account.user.id);
+    [...resumes.values()].filter(
+      (row) =>
+        row.user_id === account.user.id &&
+        allowedRecord(account, "resume", row.id),
+    );
   if (fixture && request.method === "GET") return reply(200, own());
   const create = (values) => {
     const now = new Date().toISOString();
@@ -58,6 +63,14 @@ export async function handleResumes(request, response, url, account, json) {
   if (url.searchParams.get("user_id") !== `eq.${account.user.id}`)
     return reply(403, { message: "Missing ownership filter" });
   let rows = own();
+  const pattern = url.searchParams.get("name");
+  if (pattern?.startsWith("ilike.%")) {
+    const q = pattern
+      .slice(7, -1)
+      .replace(/\\([\\%_])/g, "$1")
+      .toLowerCase();
+    rows = rows.filter((r) => r.name.toLowerCase().includes(q));
+  }
   for (const field of ["id", "revision"]) {
     const filter = url.searchParams.get(field);
     if (filter?.startsWith("eq."))

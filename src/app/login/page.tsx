@@ -6,6 +6,7 @@ import { AccountSubmit } from "@/components/account-submit";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { getAccount } from "@/lib/auth/account";
 import { signInWithGoogle } from "@/lib/auth/actions";
+import { consentDestination } from "@/features/connections/model";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -26,11 +27,16 @@ const messages: Record<string, string> = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; signedOut?: string }>;
+  searchParams: Promise<{
+    error?: string;
+    signedOut?: string;
+    authorization_id?: string;
+  }>;
 }) {
   const params = await searchParams;
   const config = getSupabaseConfig();
-  if (config && (await getAccount())) redirect("/app");
+  const returnTo = consentDestination(params.authorization_id);
+  if (config && (await getAccount())) redirect(returnTo ?? "/app");
   const message =
     params.error && Object.hasOwn(messages, params.error)
       ? messages[params.error]
@@ -88,6 +94,13 @@ export default async function LoginPage({
             </p>
           )}
           <form action={signInWithGoogle} className="mt-7">
+            {returnTo && (
+              <input
+                type="hidden"
+                name="authorization_id"
+                value={params.authorization_id}
+              />
+            )}
             <AccountSubmit pendingLabel="Opening Google…" disabled={!config}>
               Continue with Google <ArrowRight size={16} aria-hidden="true" />
             </AccountSubmit>

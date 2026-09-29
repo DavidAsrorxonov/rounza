@@ -1,3 +1,4 @@
+import { allowedRecord } from "./connection-server.mjs";
 // HTTP protocol fixture only. Real SQL/RLS/history assertions live in tests/database.
 import { randomUUID } from "node:crypto";
 const stores = Object.fromEntries(
@@ -213,6 +214,9 @@ export async function handleJourney(
     : [...stores[table].values()].filter(
         (row) => row.user_id === account.user.id,
       );
+  rows = rows.filter((row) =>
+    allowedRecord(account, "application", row.application_id),
+  );
   for (const key of [
     "id",
     "application_id",

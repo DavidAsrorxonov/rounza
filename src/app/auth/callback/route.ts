@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getSupabaseConfig } from "@/lib/supabase/config";
 import { cookies } from "next/headers";
-import { consentDestination } from "@/features/connections/model";
+import { consentReturnDestination } from "@/features/connections/model";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
@@ -10,10 +10,7 @@ export async function GET(request: Request) {
   const supabase = await createClient();
   const cookieStore = await cookies();
   const pending = cookieStore.get("rounza-consent-return")?.value;
-  const match = pending?.match(
-    /^\/auth\/consent\?authorization_id=([a-fA-F0-9-]+)$/,
-  );
-  const returnTo = consentDestination(match?.[1]);
+  const returnTo = consentReturnDestination(pending);
   cookieStore.set("rounza-consent-return", "", {
     path: "/auth/callback",
     maxAge: 0,

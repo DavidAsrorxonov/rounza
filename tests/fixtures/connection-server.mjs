@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 export const connections = new Map();
 const authorizations = new Map();
 export function allowedConnection(account) {
@@ -53,7 +53,11 @@ export async function handleConnections(
   if (account.clientId)
     return reply(403, { message: "Browser session required" });
   if (url.pathname === "/fixture/authorization") {
-    const id = randomUUID(),
+    // Match Supabase Auth's SecureAlphanumeric(32): lowercase base32, no padding.
+    const alphabet = "abcdefghijklmnopqrstuvwxyz234567";
+    const id = Array.from(randomBytes(32), (byte) => alphabet[byte & 31]).join(
+        "",
+      ),
       clientId = url.searchParams.get("client_id") ?? randomUUID();
     authorizations.set(id, {
       authorization_id: id,

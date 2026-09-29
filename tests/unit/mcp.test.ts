@@ -8,7 +8,9 @@ import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/
 import { POST, GET } from "../../src/app/mcp/route";
 import { GET as metadata } from "../../src/app/.well-known/oauth-protected-resource/mcp/route";
 import {
+  authorizationId,
   consentDestination,
+  consentReturnDestination,
   permissionsInput,
 } from "../../src/features/connections/model";
 
@@ -254,10 +256,42 @@ test("MCP uses signed delegated tokens, live grants, discovery and bounded read-
 test("consent return destinations and permission inputs are strictly bounded", () => {
   assert.equal(consentDestination("https://evil.example"), null);
   assert.equal(consentDestination("//evil.example"), null);
-  assert.equal(
-    consentDestination("11111111-1111-4111-8111-111111111111"),
-    "/auth/consent?authorization_id=11111111-1111-4111-8111-111111111111",
-  );
+  // Supabase's public authorization ID is an opaque string, not its row UUID.
+  const id = "abcdefghijklmnopqrstuvwxyz234567";
+  assert.equal(authorizationId.safeParse(id).success, true);
+  assert.equal(consentDestination(id), `/auth/consent?authorization_id=${id}`);
+  const destination = `/auth/consent?authorization_id=${id}`;
+  assert.equal(consentReturnDestination(destination), destination);
+  for (const invalid of [
+    undefined,
+    `https://evil.example${destination}`,
+    `//evil.example${destination}`,
+    `/app?authorization_id=${id}`,
+    `${destination}&next=https://evil.example`,
+    `${destination}#fragment`,
+    `${destination}\n`,
+  ]) {
+    assert.equal(consentReturnDestination(invalid), null);
+  }
+  for (const invalid of [
+    undefined,
+    "",
+    "11111111-1111-4111-8111-111111111111",
+    id.slice(1),
+    `${id}a`,
+    `${id}&next=https://evil.example`,
+    `${id}#fragment`,
+    `../${id}`,
+    `%2F${id}`,
+    `${id}\n`,
+    [id, id],
+  ]) {
+    assert.equal(consentDestination(invalid), null);
+    assert.equal(
+      consentReturnDestination(`/auth/consent?authorization_id=${invalid}`),
+      null,
+    );
+  }
   assert.equal(
     permissionsInput.safeParse({
       application_access: "all",

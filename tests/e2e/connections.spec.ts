@@ -39,11 +39,13 @@ async function authorization(
   session: { access_token: string },
   query = "",
 ) {
-  return (
+  const result = await (
     await request.get(`${fixture}/fixture/authorization?${query}`, {
       headers: headers(session),
     })
   ).json();
+  expect(result.id).toMatch(/^[a-z2-7]{32}$/);
+  return result;
 }
 async function tool(
   request: APIRequestContext,

@@ -113,6 +113,12 @@ users may be redirected by Supabase for already-approved identity scopes; this
 never creates or broadens a Rounza record grant. Change permissions in Rounza.
 If a connection was revoked, complete provider revocation before reconnecting.
 
+Supabase's `authorization_id` is a 32-character alphanumeric string, distinct
+from its internal authorization row UUID. Consent, decisions, and the Google
+sign-in return cookie validate this same format. The local Auth fixture mirrors
+the provider's lowercase base32 IDs, including letters outside hexadecimal.
+See the [Supabase authorization model](https://github.com/supabase/auth/blob/master/internal/models/oauth_authorization.go).
+
 ## Authorization and revocation boundaries
 
 Every MCP request verifies signature, issuer, exact resource audience, expiry,

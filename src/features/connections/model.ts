@@ -21,7 +21,12 @@ export type Connection = Permissions & {
 };
 export type ConnectionState = { message?: string };
 export type RecordOption = { id: string; label: string };
-export const authorizationId = z.uuid();
+// Supabase exposes SecureAlphanumeric(32), not the oauth_authorizations row UUID.
+// Keep this URL-safe and bounded for both the Auth API path and login return cookie.
+export const authorizationId = z
+  .string()
+  .length(32)
+  .regex(/^[A-Za-z0-9]{32}$/);
 export const emptyPermissions: Permissions = {
   application_access: "selected",
   application_ids: [],
@@ -41,5 +46,11 @@ export function consentDestination(id: unknown) {
   const parsed = authorizationId.safeParse(id);
   return parsed.success
     ? `/auth/consent?authorization_id=${parsed.data}`
+    : null;
+}
+export function consentReturnDestination(destination: unknown) {
+  const prefix = "/auth/consent?authorization_id=";
+  return typeof destination === "string" && destination.startsWith(prefix)
+    ? consentDestination(destination.slice(prefix.length))
     : null;
 }

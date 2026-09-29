@@ -227,26 +227,27 @@ export function PermissionForm({
                   ? "Includes descriptions, notes, rounds, tasks, contacts and schedule history for the applications you allow."
                   : "Resume text can include your contact details and work history. Resume access is separate from application access."}
               </p>
-              <label className="field-label mt-4">
+              <label className="field-label mt-4" htmlFor={access}>
                 {kind === "applications"
                   ? "Application access"
                   : "Resume access"}
-                <select
-                  className="field"
-                  name={access}
-                  value={permissions[access]}
-                  onChange={(e) => {
-                    setPermissions((p) => ({ ...p, [access]: e.target.value }));
-                    setConfirmed(false);
-                  }}
-                >
-                  <option value="none">No access</option>
-                  <option value="selected">Selected {kind} only</option>
-                  <option value="all">
-                    All {kind}, including future records
-                  </option>
-                </select>
               </label>
+              <select
+                id={access}
+                className="field"
+                name={access}
+                value={permissions[access]}
+                onChange={(e) => {
+                  setPermissions((p) => ({ ...p, [access]: e.target.value }));
+                  setConfirmed(false);
+                }}
+              >
+                <option value="none">No access</option>
+                <option value="selected">Selected {kind} only</option>
+                <option value="all">
+                  All {kind}, including future records
+                </option>
+              </select>
               {permissions[access] === "all" && (
                 <p className="account-notice mt-4">
                   This includes every current and future{" "}

@@ -26,7 +26,7 @@ export default function HomePage() {
 
       <main id="main-content" tabIndex={-1} className="landing-main">
         <div className="landing-copy">
-          <p className="eyebrow">EVERY APPLICATION. EVERY ROUND.</p>
+          <p className="eyebrow">EVERY APPLICATION. EVERY ROUND!</p>
           <h1>
             Your search.
             <br />A little <span>clearer.</span>

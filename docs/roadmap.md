@@ -1,20 +1,28 @@
 # Implementation roadmap
 
-Milestones 1–7 are included in this implementation. Later milestones start when
+Milestones 1–8 are included in this implementation. Later milestones start when
 requested. Each milestone should deliver a working result and relevant checks.
 
-| Milestone                         | Result                                                                                                                                            |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. Project foundation             | Next.js, TypeScript, Tailwind, shadcn/ui, source structure, environment examples, reproducible installation, and GitHub quality/build/test checks |
-| 2. Design and interactive demo    | Responsive navigation, next-actions dashboard, application board/list and detail layouts, fictional data, and a resettable isolated demo          |
-| 3. Accounts and database          | Supabase, Google sign-in, sessions, migrations, ownership, and row-level isolation                                                                |
-| 4. Core application tracking      | Create, edit, search, filter, and organize applications with company, role, job description, URL, dates, location, and notes                      |
-| 5. Hiring rounds and next actions | Custom/repeated interviews, assessments, tasks, contacts, meetings, scheduling history, and in-app reminders                                      |
-| 6. Employer portals and vault     | Reusable portal accounts, encrypted credentials, separate vault unlock, recovery, reveal/copy, and automatic locking                              |
-| 7. Resume library                 | Reviewed text from PDF/DOCX/paste, named resumes, import errors, editing, and deletion                                                            |
-| 8. AI and resume analysis         | Server-side OpenAI integration, schema validation, quotas and budget accounting, grounded comparisons and bullet rewrites                         |
-| 9. Recruiter updates              | Local credential review, message extraction, reviewable proposals, confirmation, deduplication, and rescheduling                                  |
-| 10. Integration and release       | Full journey, accessibility, mobile, and security checks; production configuration; Vercel deployment; release documentation                      |
+| Milestone                          | Result                                                                                                                                            |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. Project foundation              | Next.js, TypeScript, Tailwind, shadcn/ui, source structure, environment examples, reproducible installation, and GitHub quality/build/test checks |
+| 2. Design and interactive demo     | Responsive navigation, next-actions dashboard, application board/list and detail layouts, fictional data, and a resettable isolated demo          |
+| 3. Accounts and database           | Supabase, Google sign-in, sessions, migrations, ownership, and row-level isolation                                                                |
+| 4. Core application tracking       | Create, edit, search, filter, and organize applications with company, role, job description, URL, dates, location, and notes                      |
+| 5. Hiring rounds and next actions  | Custom/repeated interviews, assessments, tasks, contacts, meetings, scheduling history, and in-app reminders                                      |
+| 6. Employer portals and vault      | Reusable portal accounts, encrypted credentials, separate vault unlock, recovery, reveal/copy, and automatic locking                              |
+| 7. Resume library                  | Reviewed text from PDF/DOCX/paste, named resumes, import errors, editing, and deletion                                                            |
+| 8. Connect your AI                 | Controlled read-only MCP access, consent, connection permissions and revocation                                                                   |
+| 9. Review inbox                    | Assistant proposals with in-Rounza approval, atomic application and stale/duplicate protection                                                    |
+| 10. Application packages           | Job-specific resumes, letters and prep with immutable user-confirmed submitted snapshots                                                          |
+| 11. Shared career context          | User-confirmed facts, preferences and structured application briefs shared across assistants                                                      |
+| 12. Resume and letter assistance   | Evidence-based tailoring and comparisons using permitted context                                                                                  |
+| 13. Interview assistance           | Preparation, debriefs and proposed next tasks                                                                                                     |
+| 14. Ready-made workflows           | Repeatable assistant workflows and reviewed recruiter updates                                                                                     |
+| 15. Exports                        | PDF/DOCX, printable preparation and calendar downloads                                                                                            |
+| 16. Compatibility and core release | Grok/Gemini compatibility, hosted checks, accessibility, mobile and security review                                                               |
+| 17. Native email import            | Separate Gmail/Outlook authorization and manual read-only message import                                                                          |
+| 18. Optional email background sync | Selected folders/labels, reliable incremental sync and reviewed candidates                                                                        |
 
 ## Milestone 1 acceptance
 
@@ -120,14 +128,37 @@ requested. Each milestone should deliver a working result and relevant checks.
 - Unit, database and desktop/mobile browser tests cover imports and CRUD flows.
   Setup documentation includes the new migration and hosted acceptance checklist.
 
-## Product scope
+## Milestone 8 acceptance
 
-The first version is an English-language, personal job-search tool with a public
-demo and private accounts. The next-action view is central; the board is a summary
-of the full hiring journey. Multiple interview rounds and encrypted portal credentials are
-first-class features.
+- ChatGPT/Claude connect through authenticated remote MCP and explicit Rounza consent.
+- Users choose selected/all applications and independent none/selected/all resume access.
+- Six read-only tools use bounded, paginated reads with source links and stored revisions.
+- RLS enforces current grants and live OAuth sessions; direct APIs cannot bypass write or vault restrictions.
+- Normal browser sessions manage permissions; reductions and revocation affect subsequent reads.
+- Reconnection cannot reactivate old tokens. Permission edits reject stale revisions.
+- Local protocol, unit, database and browser tests are distinct from real hosted assistant acceptance.
+- See [AI connection setup](ai-connections.md) for OAuth, deployment and live checks.
 
-Email integrations, email notifications, automatic portal login, scraping,
-auto-applications, cover letters, interview coaching, subscriptions, and OCR are
-outside the initial scope. Deployment can use a Vercel URL before a domain is
-purchased. `Rounza` is the chosen name; no domain purchase is implied.
+## Product scope and later milestones
+
+The personal job tracker and public demo retain milestones 1–7. Users connect their
+own assistants; Rounza does not fund model requests, store model keys or provide
+embedded BYOK chat in this roadmap. Portal credentials remain outside all AI access.
+
+Step 9 introduces proposals, never direct autonomous edits. Users approve proposals
+inside Rounza, with source records, revisions, idempotency and atomic batch application.
+Steps 10–11 add application packages and approved shared context; submitted copies
+survive source-library edits/deletion, and chat transcripts are not synchronized.
+Steps 12–14 provide evidence-based assistance and workflows without inventing career
+facts or authoritative hiring scores. Step 15 starts with one accessible document
+template and one-way calendar downloads. Broader client support and the core release
+precede native email integration, so mailbox verification does not block core release.
+
+Gmail/Outlook integrations in steps 17–18 are separate read-only authorizations.
+Manual import comes first; opt-in folder/label background sync produces reviewable
+candidates. No sending, shared mailboxes, attachment ingestion, autonomous model calls,
+or automatic application edits. Unreviewed mail is not exposed through MCP.
+
+Automatic portal login, scraping, auto-applications, OCR and two-way calendar sync
+remain outside scope. The purchased domain is rounza.app; deployment and live
+assistant validation require the setup steps documented separately.

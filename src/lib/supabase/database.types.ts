@@ -1,4 +1,5 @@
 import type { Resume, ResumeFields } from "@/features/resumes/model";
+import type { Connection, Permissions } from "@/features/connections/model";
 import type {
   VaultRecord,
   PortalRecord,
@@ -108,6 +109,20 @@ type JourneyTable<T extends JourneyRecord, K extends keyof T> = {
 export type Database = {
   public: {
     Tables: {
+      ai_connections: {
+        Row: Connection;
+        Insert: Permissions & {
+          user_id: string;
+          client_id: string;
+          client_name: string;
+          revoked_at?: string | null;
+        };
+        Update: Partial<Permissions> & {
+          client_name?: string;
+          revoked_at?: string | null;
+        };
+        Relationships: [];
+      };
       resumes: {
         Row: Resume;
         Insert: ResumeFields & { id?: string; user_id: string };
@@ -157,6 +172,7 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      ai_connection_status: { Args: Record<string, never>; Returns: boolean };
       create_portal_account: {
         Args: {
           p_id: string;

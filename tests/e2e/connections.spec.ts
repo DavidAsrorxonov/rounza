@@ -92,7 +92,7 @@ test("consent preserves selected records across search pages and MCP obeys permi
   const auth = await authorization(request, session);
   await page.goto(`/auth/consent?authorization_id=${auth.id}`);
   await expect(
-    page.getByRole("button", { name: "Allow read access" }),
+    page.getByRole("button", { name: "Allow selected access" }),
   ).toBeDisabled();
   await expect(page.getByLabel("Resume access", { exact: true })).toHaveValue(
     "none",
@@ -118,7 +118,7 @@ test("consent preserves selected records across search pages and MCP obeys permi
   await page
     .getByRole("checkbox", { name: "I approve this assistant", exact: false })
     .check();
-  await page.getByRole("button", { name: "Allow read access" }).click();
+  await page.getByRole("button", { name: "Allow selected access" }).click();
   await expect(page).toHaveURL(/fixture\/connected\?result=approve/);
   const delegated = await (
     await request.get(
@@ -254,7 +254,7 @@ test("stale permission forms cannot overwrite a newer grant", async ({
   await page
     .getByRole("checkbox", { name: "I approve this assistant", exact: false })
     .check();
-  await page.getByRole("button", { name: "Allow read access" }).click();
+  await page.getByRole("button", { name: "Allow selected access" }).click();
   await expect(page).toHaveURL(/result=approve/);
   await page.goto("/app/ai-connections");
   await page.getByRole("link", { name: "Manage access", exact: true }).click();

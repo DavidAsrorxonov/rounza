@@ -1,5 +1,6 @@
 import type { Resume, ResumeFields } from "@/features/resumes/model";
 import type { Connection, Permissions } from "@/features/connections/model";
+import type { Proposal, ProposalInput } from "@/features/proposals/model";
 import type {
   VaultRecord,
   PortalRecord,
@@ -109,6 +110,12 @@ type JourneyTable<T extends JourneyRecord, K extends keyof T> = {
 export type Database = {
   public: {
     Tables: {
+      ai_proposals: {
+        Row: Proposal;
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       ai_connections: {
         Row: Connection;
         Insert: Permissions & {
@@ -172,6 +179,25 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      submit_ai_proposal: { Args: { payload: ProposalInput }; Returns: string };
+      ai_proposal_status: {
+        Args: { proposal_id: string };
+        Returns: {
+          id: string;
+          status: string;
+          created_at: string;
+          decided_at: string | null;
+          expires_at: string;
+        };
+      };
+      decide_ai_proposal: {
+        Args: {
+          proposal_id: string;
+          expected_revision: number;
+          decision: string;
+        };
+        Returns: Proposal["result"];
+      };
       ai_connection_status: { Args: Record<string, never>; Returns: boolean };
       create_portal_account: {
         Args: {

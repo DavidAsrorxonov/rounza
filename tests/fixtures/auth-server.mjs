@@ -1,4 +1,5 @@
 import { handleResumes } from "./resume-server.mjs";
+import { handleProposals } from "./proposal-server.mjs";
 import { handleConnections, allowedRecord } from "./connection-server.mjs";
 import { handleVault, cascadeVaultApplication } from "./vault-server.mjs";
 // Loopback-only OAuth/Auth/PostgREST protocol fixture; never loaded by the app.
@@ -242,6 +243,10 @@ createServer(async (request, response) => {
   }
   if (account.databaseError)
     return json(response, 503, { message: "Fixture database unavailable" });
+  if (
+    await handleProposals(request, response, url, account, applications, json)
+  )
+    return;
   if (
     account.clientId &&
     ((request.method !== "GET" &&

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const accessModes = ["none", "selected", "all"] as const;
 export const permissionsInput = z.object({
+  allow_proposals: z.boolean().default(false),
   application_access: z.enum(accessModes),
   application_ids: z.array(z.uuid()).max(500),
   resume_access: z.enum(accessModes),
@@ -28,6 +29,7 @@ export const authorizationId = z
   .length(32)
   .regex(/^[A-Za-z0-9]{32}$/);
 export const emptyPermissions: Permissions = {
+  allow_proposals: false,
   application_access: "selected",
   application_ids: [],
   resume_access: "none",
@@ -35,6 +37,7 @@ export const emptyPermissions: Permissions = {
 };
 export function readPermissions(form: FormData) {
   return permissionsInput.safeParse({
+    allow_proposals: form.get("allow_proposals") === "yes",
     application_access: form.get("application_access"),
     application_ids: form.getAll("application_ids"),
     resume_access: form.get("resume_access"),

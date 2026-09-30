@@ -8,6 +8,7 @@ import {
   LockKeyhole,
   FileText,
   Plug,
+  Inbox,
 } from "lucide-react";
 export function WorkspaceNav() {
   const pathname = usePathname();
@@ -54,6 +55,14 @@ export function WorkspaceNav() {
         }
       >
         <Plug size={16} aria-hidden="true" /> AI connections
+      </Link>
+      <Link
+        href="/app/review-inbox"
+        aria-current={
+          pathname.startsWith("/app/review-inbox") ? "page" : undefined
+        }
+      >
+        <Inbox size={16} aria-hidden="true" /> Review inbox
       </Link>
     </nav>
   );

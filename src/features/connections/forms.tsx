@@ -209,7 +209,7 @@ export function PermissionForm({
         </div>
       )}
       <fieldset disabled={pending}>
-        <legend className="sr-only">Assistant read permissions</legend>
+        <legend className="sr-only">Assistant permissions</legend>
         {(["applications", "resumes"] as const).map((kind) => {
           const access =
             kind === "applications" ? "application_access" : "resume_access";
@@ -274,10 +274,34 @@ export function PermissionForm({
             </section>
           );
         })}
+        <section className="tracking-form-section">
+          <h2>Suggestions for your review</h2>
+          <label className="connection-check">
+            <input
+              type="checkbox"
+              name="allow_proposals"
+              value="yes"
+              checked={permissions.allow_proposals}
+              onChange={(e) => {
+                setPermissions((p) => ({
+                  ...p,
+                  allow_proposals: e.target.checked,
+                }));
+                setConfirmed(false);
+              }}
+            />
+            Allow this assistant to submit proposals to my review inbox
+          </label>
+          <p>
+            Proposals can suggest changes to permitted records. Creating new
+            applications or resumes requires all-record access in that category.
+            Every batch needs your approval in Rounza before anything changes.
+          </p>
+        </section>
         <p className="account-notice">
-          Read access only. Your portal vault and credentials are never shared.
-          Revoking access stops future reads; it cannot remove information
-          already received by an assistant.
+          Your portal vault and credentials are never shared. Revoking access
+          stops future reads; it cannot remove information already received by
+          an assistant.
         </p>
         {authorization && (
           <label className="connection-check mt-5">
@@ -288,7 +312,7 @@ export function PermissionForm({
               checked={confirmed}
               onChange={(e) => setConfirmed(e.target.checked)}
             />
-            I approve this assistant reading the records selected above.
+            I approve this assistant using the permissions selected above.
           </label>
         )}
         <div className="vault-buttons mt-6">
@@ -310,7 +334,7 @@ export function PermissionForm({
             {pending
               ? "Saving…"
               : authorization
-                ? "Allow read access"
+                ? "Allow selected access"
                 : "Save permissions"}
           </Button>
         </div>
@@ -337,8 +361,8 @@ export function RevokeForm({
     >
       <h2>Revoke access</h2>
       <p>
-        Block this assistant from further reads. Reconnecting requires fresh
-        authorization.
+        Block this assistant from further reads and proposals. Reconnecting
+        requires fresh authorization.
       </p>
       {state.message && (
         <p role="alert" className="account-notice">

@@ -1,5 +1,6 @@
 import { resumeChecks } from "./resume-checks.mjs";
 import { connectionChecks } from "./connection-checks.mjs";
+import { proposalChecks } from "./proposal-checks.mjs";
 import { vaultChecks } from "./vault-checks.mjs";
 import { journeyChecks } from "./journey-checks.mjs";
 import assert from "node:assert/strict";
@@ -379,6 +380,7 @@ test("private records enforce ownership in Postgres", async (t) => {
     await vaultChecks(t, db, as, alice, bob, app, bobApp);
     await resumeChecks(t, db, as, alice, bob);
     await connectionChecks(t, db, as, alice, bob);
+    await proposalChecks(t, db, as, alice, bob);
     await t.test(
       "database constraints reject invalid records and owners can delete",
       async () => {

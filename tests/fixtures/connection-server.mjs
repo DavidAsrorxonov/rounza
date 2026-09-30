@@ -119,6 +119,7 @@ export async function handleConnections(
       id: old?.id ?? randomUUID(),
       application_access: "selected",
       application_ids: [],
+      allow_proposals: false,
       resume_access: "none",
       resume_ids: [],
       created_at: old?.created_at ?? now,

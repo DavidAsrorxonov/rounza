@@ -2,7 +2,7 @@
 
 A thoughtful home for your job search, from the first application to the final round.
 
-**Current scope: milestones 1–7 — hiring journeys, an encrypted portal vault, a resume library, and a public demo.**
+**Current scope: milestones 1–9 — job tracking, hiring journeys, an encrypted portal vault, resumes, AI connections and a review inbox.**
 Sign in with Google to save applications, update their details/status, search and
 filter your records, and use list or board views. Your overview shows current
 counts, next actions, and recently updated applications. Each opportunity supports
@@ -10,7 +10,8 @@ custom interview/assessment rounds, rescheduling history, preparation tasks and
 contacts. Reusable employer portal accounts are encrypted in the browser and
 unlocked with a separate vault passphrase or recovery key. The fictional demo
 remains independent. The resume library imports text from PDF/DOCX on your device or accepts pasted text,
-then saves the version you review. AI analysis follows in the next milestone.
+then saves the version you review. Connect your own assistant to read permitted
+records and, with separate permission, submit proposals that you approve in Rounza.
 
 ## Run locally
 
@@ -101,6 +102,9 @@ src/
   features/journey/  Rounds, tasks, contacts, schedule history, and next actions
   features/vault/    Browser encryption, portal accounts, and encrypted server operations
   features/resumes/  Local PDF/DOCX import, reviewed resume text, and private records
+  features/connections/  OAuth consent and assistant permissions
+  features/proposals/  Assistant suggestions and website-only review decisions
+  lib/mcp/          Authenticated MCP record reads and proposal tools
   lib/auth/         Verified account reads and server auth actions
   lib/supabase/     Server client, configuration, and database types
 supabase/            Versioned schema and row-level access policies
@@ -134,4 +138,5 @@ See [the roadmap](docs/roadmap.md) for scope and
 [the architecture notes](docs/architecture.md) for boundaries. Step 8 adds
 [AI connections and a read-only MCP server](docs/ai-connections.md), including
 Supabase OAuth and Vercel/rounza.app setup instructions. Live assistant testing
-requires a reachable HTTPS deployment; the full release remains a later milestone.
+requires a reachable HTTPS deployment. Step 9 adds the [review inbox](docs/review-inbox.md)
+and requires its forward-only migration before deployment. The full release remains a later milestone.

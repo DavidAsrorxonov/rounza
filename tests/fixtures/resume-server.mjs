@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { allowedRecord } from "./connection-server.mjs";
-const resumes = new Map();
+export const resumes = new Map();
 export async function handleResumes(request, response, url, account, json) {
   const fixture = url.pathname === "/fixture/resumes";
   if (!fixture && url.pathname !== "/rest/v1/resumes") return false;

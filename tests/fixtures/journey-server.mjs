@@ -1,7 +1,7 @@
 import { allowedRecord } from "./connection-server.mjs";
 // HTTP protocol fixture only. Real SQL/RLS/history assertions live in tests/database.
 import { randomUUID } from "node:crypto";
-const stores = Object.fromEntries(
+export const stores = Object.fromEntries(
   [
     "hiring_rounds",
     "preparation_tasks",
@@ -9,7 +9,7 @@ const stores = Object.fromEntries(
     "round_schedule_history",
   ].map((name) => [name, new Map()]),
 );
-function addHistory(row, previous) {
+export function addHistory(row, previous) {
   const keys = [
     "scheduled_at",
     "due_on",

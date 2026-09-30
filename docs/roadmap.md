@@ -1,6 +1,6 @@
 # Implementation roadmap
 
-Milestones 1–8 are included in this implementation. Later milestones start when
+Milestones 1–9 are included in this implementation. Later milestones start when
 requested. Each milestone should deliver a working result and relevant checks.
 
 | Milestone                          | Result                                                                                                                                            |
@@ -139,13 +139,26 @@ requested. Each milestone should deliver a working result and relevant checks.
 - Local protocol, unit, database and browser tests are distinct from real hosted assistant acceptance.
 - See [AI connection setup](ai-connections.md) for OAuth, deployment and live checks.
 
+## Milestone 9 acceptance
+
+- Proposal access is separately opt-in; existing connections remain read-only.
+- Assistants stage bounded batches of application, round, task, contact and resume creates/updates.
+- The inbox shows client attribution, explanations, source revisions and before/after values.
+- Only the owning website user can approve or reject; approval includes explicit text review.
+- Source and parent revisions, current grants, OAuth sessions and activation cutoffs are rechecked.
+- Applying a batch, its revisions and schedule history is atomic; any failure rolls back all writes.
+- Idempotency keys, immutable payloads and stable record IDs protect retries and duplicate decisions.
+- Proposal history stays private; assistant status reads never expose stored snapshots.
+- Database, protocol and desktop/mobile tests cover the review flow and authorization boundaries.
+- See [review inbox setup and contract](review-inbox.md) for migration and hosted acceptance.
+
 ## Product scope and later milestones
 
 The personal job tracker and public demo retain milestones 1–7. Users connect their
 own assistants; Rounza does not fund model requests, store model keys or provide
 embedded BYOK chat in this roadmap. Portal credentials remain outside all AI access.
 
-Step 9 introduces proposals, never direct autonomous edits. Users approve proposals
+Step 9 provides proposals, never direct autonomous edits. Users approve proposals
 inside Rounza, with source records, revisions, idempotency and atomic batch application.
 Steps 10–11 add application packages and approved shared context; submitted copies
 survive source-library edits/deletion, and chat transcripts are not synchronized.

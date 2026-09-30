@@ -208,7 +208,7 @@ See [the resume library guide](resume-library.md) for limits, setup and verifica
 ## AI connections and MCP
 
 `features/connections` owns browser consent and grant management. `lib/mcp` provides
-JWT authentication, six read-only tools and per-request SDK servers. The Next `/mcp`
+JWT authentication, six record-read tools, proposal submission/status and per-request SDK servers. The Next `/mcp`
 route uses stateless Streamable HTTP with JSON responses. Public protected-resource
 metadata points to the existing Supabase OAuth issuer. The operator enables DCR,
 PKCE, asymmetric signing and the custom token hook; Rounza does not implement its
@@ -222,11 +222,25 @@ sets the resource audience for OAuth tokens only. MCP data access uses a publish
 client with that verified bearer token, never a service-role client. See the
 [AI connections guide](ai-connections.md) for setup and security boundaries.
 
+## Review inbox
+
+`features/proposals` provides bounded change schemas, private inbox reads and
+website decision actions. Proposal submission is a separate opt-in on each AI
+connection. Existing delegated record-write restrictions remain; only the staging
+RPC can insert `ai_proposals`, whose full contents are browser-owner readable.
+Assistants get status metadata, never a snapshot-read or approval capability.
+
+The database captures immutable before/after snapshots, expected record revisions,
+parent revisions and the submitting connection activation/session. The browser-only
+decision RPC locks and rechecks all sources and current grants before writing.
+Record changes, normal triggers/history and the approval receipt commit together.
+Stable UUIDs, unique retry keys and terminal decision states prevent duplicate
+application. There are no deletion proposals or automatic model calls. See the
+[review inbox guide](review-inbox.md) for limits, SQL privileges and deployment.
+
 ## Planned boundaries
 
-Agent mutations begin with proposals in step 9, approved in the Rounza website.
-Proposals retain source references and base revisions; applying a batch is atomic
-and idempotent. Application packages preserve user-confirmed submitted snapshots;
+Application packages preserve user-confirmed submitted snapshots;
 shared context contains approved career facts and summaries, not conversation sync.
 Resume/letter suggestions use supplied evidence and do not invent qualifications.
 

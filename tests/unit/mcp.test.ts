@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { once } from "node:events";
+import { randomUUID } from "node:crypto";
 import { generateKeyPair, exportJWK, SignJWT } from "jose";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
@@ -25,6 +26,8 @@ test("MCP uses signed delegated tokens, live grants, discovery and bounded read-
   const user = "11111111-1111-4111-8111-111111111111",
     clientId = "22222222-2222-4222-8222-222222222222",
     sessionId = "33333333-3333-4333-8333-333333333333";
+  let proposalsEnabled = false;
+  let staged: unknown;
   let grant = true,
     origin = "";
   const reads: { path: string; search: URLSearchParams; method: string }[] = [];
@@ -50,6 +53,28 @@ test("MCP uses signed delegated tokens, live grants, discovery and bounded read-
     }
     if (url.pathname === "/rest/v1/rpc/ai_connection_status") {
       res.end(JSON.stringify(grant));
+      return;
+    }
+    if (url.pathname === "/rest/v1/rpc/submit_ai_proposal") {
+      if (!proposalsEnabled) {
+        res.statusCode = 403;
+        res.end(JSON.stringify({ message: "Proposal permission required" }));
+        return;
+      }
+      const chunks = [];
+      for await (const chunk of req) chunks.push(chunk);
+      staged = JSON.parse(Buffer.concat(chunks).toString()).payload;
+      res.end(JSON.stringify(sessionId));
+      return;
+    }
+    if (url.pathname === "/rest/v1/rpc/ai_proposal_status") {
+      res.end(
+        JSON.stringify({
+          id: sessionId,
+          status: "pending",
+          expires_at: "2026-10-10T00:00:00Z",
+        }),
+      );
       return;
     }
     reads.push({
@@ -163,8 +188,17 @@ test("MCP uses signed delegated tokens, live grants, discovery and bounded read-
       }),
     );
     const tools = await client.listTools();
-    assert.equal(tools.tools.length, 6);
-    assert.ok(tools.tools.every((t) => t.annotations?.readOnlyHint === true));
+    assert.equal(tools.tools.length, 8);
+    assert.ok(
+      tools.tools
+        .filter((t) => t.name !== "submit_proposal")
+        .every((t) => t.annotations?.readOnlyHint === true),
+    );
+    assert.equal(
+      tools.tools.find((t) => t.name === "submit_proposal")?.annotations
+        ?.readOnlyHint,
+      false,
+    );
     for (const [name, args] of [
       ["search_applications", { query: "Example", page: 2, limit: 5 }],
       ["get_application", { id: sessionId }],
@@ -214,6 +248,52 @@ test("MCP uses signed delegated tokens, live grants, discovery and bounded read-
       true,
     );
     assert.equal(reads.length, before);
+    const proposed = {
+      idempotency_key: randomUUID(),
+      title: "Suggested note",
+      summary: "Requested by the user",
+      changes: [
+        {
+          entity: "application",
+          action: "update",
+          record_id: sessionId,
+          expected_revision: 3,
+          data: { notes: "Proposed text" },
+        },
+      ],
+    };
+    assert.equal(
+      (await client.callTool({ name: "submit_proposal", arguments: proposed }))
+        .isError,
+      true,
+    );
+    assert.equal(staged, undefined);
+    proposalsEnabled = true;
+    const submission = await client.callTool({
+      name: "submit_proposal",
+      arguments: proposed,
+    });
+    assert.notEqual(submission.isError, true);
+    assert.deepEqual(staged, proposed);
+    assert.match(JSON.stringify(submission.structuredContent), /review-inbox/);
+    assert.notEqual(
+      (
+        await client.callTool({
+          name: "get_proposal_status",
+          arguments: { id: sessionId },
+        })
+      ).isError,
+      true,
+    );
+    assert.equal(
+      (
+        await client.callTool({
+          name: "approve_proposal",
+          arguments: { id: sessionId },
+        })
+      ).isError,
+      true,
+    );
     const oversized = await POST(
       new Request(`${origin}/mcp`, {
         method: "POST",
@@ -222,7 +302,7 @@ test("MCP uses signed delegated tokens, live grants, discovery and bounded read-
           "Content-Type": "application/json",
           Accept: "application/json, text/event-stream",
         },
-        body: " ".repeat(65537),
+        body: " ".repeat(262145),
       }),
     );
     assert.equal(oversized.status, 413);

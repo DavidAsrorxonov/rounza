@@ -27,9 +27,10 @@ IANA time zone (UTC by default) and optional bucket 0–3. Responses contain sou
 links and revisions where the stored record has one. Immutable schedule history
 uses its ID and creation timestamp; derived next actions refer to their source
 records. Resume text is limited by the existing 100,000-character library bound.
-Tool response JSON is capped at 1 MB, request bodies at 64 KiB. No mutation tools,
-application packages, shared career context, email integration or AI workflows
-are included yet. Those belong to subsequent milestones.
+Tool response JSON is capped at 1 MB; step 9 increases request bodies to 256 KiB
+for reviewed resume proposals. [The review inbox](review-inbox.md) adds separately
+opt-in proposal submission and status tools, with website-only approval. Application
+packages, shared career context, email integration and AI workflows remain later work.
 
 ## Set up your existing Supabase project
 
@@ -169,7 +170,8 @@ and OAuth setup are complete, verify with a dedicated test account:
 - Inspect issued access-token claims locally: correct issuer, resource audience,
   client and session. Never paste tokens into logs, issues or chat.
 - Confirm actual delegated tokens work with RLS-backed reads. Direct unauthorized
-  reads and every write are denied, including portal RPCs and grant management.
+  reads and record writes are denied, including portal RPCs and grant management.
+  Step 9 permits only proposal staging when separately enabled.
 - Reduce permissions, revoke, reconnect, and confirm the old token remains denied
   even after refresh while the newly authorized session works.
 - Check declined/expired authorization, revoked provider sessions and time-zone

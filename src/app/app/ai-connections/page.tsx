@@ -59,7 +59,7 @@ export default async function ConnectionsPage({
               </li>
               <li>Add the endpoint above and choose OAuth authentication.</li>
               <li>
-                Sign in to Rounza, select your records, and approve read access.
+                Sign in to Rounza, choose your permissions, and approve access.
               </li>
             </ol>
             <p>
@@ -91,8 +91,9 @@ export default async function ConnectionsPage({
         )}
         <p>
           <ShieldCheck size={18} aria-hidden="true" /> Assistants can read
-          permitted records. Changes inside Rounza will be available in a later
-          step. Your credential vault stays private.
+          permitted records and, if you enable proposals, send suggestions to
+          your review inbox. Only your approval applies changes. Your credential
+          vault stays private.
         </p>
       </section>
       <section className="connection-list">
@@ -121,7 +122,8 @@ export default async function ConnectionsPage({
                     · Resumes: {c.resume_access}
                     {c.resume_access === "selected"
                       ? ` (${c.resume_ids.length})`
-                      : ""}
+                      : ""}{" "}
+                    · Proposals: {c.allow_proposals ? "Allowed" : "Off"}
                   </p>
                   <p className="journey-help">
                     Authorized {c.activated_at.slice(0, 10)} (UTC)

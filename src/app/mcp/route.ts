@@ -48,7 +48,7 @@ export async function POST(request: Request) {
   const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: undefined,
     enableJsonResponse: true,
-    maxRequestBodySize: 65536,
+    maxRequestBodySize: 262144,
   });
   try {
     await server.connect(transport);

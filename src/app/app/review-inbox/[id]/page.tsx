@@ -116,12 +116,16 @@ export default async function ProposalPage({
                     {change.before && (
                       <div>
                         <h4>Before</h4>
-                        <pre>{show(change.before[field])}</pre>
+                        <pre tabIndex={0} aria-label={`${field} before`}>
+                          {show(change.before[field])}
+                        </pre>
                       </div>
                     )}
                     <div>
                       <h4>Proposed</h4>
-                      <pre>{show(change.after[field])}</pre>
+                      <pre tabIndex={0} aria-label={`${field} proposed`}>
+                        {show(change.after[field])}
+                      </pre>
                     </div>
                   </div>
                 </div>
@@ -132,6 +136,7 @@ export default async function ProposalPage({
       </div>
       {p.status === "pending" ? (
         <ReviewForm
+          key={p.id}
           owner={owner}
           id={p.id}
           revision={p.revision}

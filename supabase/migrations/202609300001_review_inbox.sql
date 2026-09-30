@@ -146,7 +146,7 @@ language plpgsql security definer set search_path = '' as $$
 declare c public.ai_connections; prior public.ai_proposals; compiled jsonb; proposal_id uuid;
 begin
   select * into c from public.ai_connections where id=rounza_private.current_ai_connection() for update;
-  if not found or not c.allow_proposals then raise exception 'Proposal permission required' using errcode='42501'; end if;
+  if not found or not c.allow_proposals or c.revoked_at is not null or c.id is distinct from rounza_private.current_ai_connection() then raise exception 'Proposal permission required' using errcode='42501'; end if;
   if jsonb_typeof(payload) is distinct from 'object' or octet_length(payload::text)>220000 or
     exists(select 1 from jsonb_object_keys(payload) k where k not in ('idempotency_key','title','summary','changes')) or
     jsonb_typeof(payload->'title') is distinct from 'string' or char_length(btrim(payload->>'title')) not between 1 and 160 or
